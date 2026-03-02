@@ -1,0 +1,26 @@
+language: "ko-KR"
+
+reviews:
+  auto_review:
+    enabled: false
+
+  profile: chill
+
+  high_level_summary: true
+  high_level_summary_in_walkthrough: true
+  high_level_summary_placeholder: ""
+  high_level_summary_instructions: >
+    Summarize this pull request for a team using SwiftUI and The Composable Architecture (TCA).
+    Emphasize architectural and behavioral changes, including:
+    - Updates to feature boundaries or reducers
+    - State mutations and action flows
+    - Side effects, async work, and dependency changes
+    - Test coverage additions or modifications, if any
+    Mention relevant linked issues and note any user-visible behavior changes.
+    Keep the summary brief and reviewer-focused.
+
+  in_progress_fortune: false
+  poem: false
+
+  path_filters:
+    - "!Tuist/Dependencies/**"
