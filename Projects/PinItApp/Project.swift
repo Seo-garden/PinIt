@@ -25,6 +25,17 @@ let project = Project(
             infoPlist: .extendingDefault(
                 with: [
                     "UILaunchScreen": [:],
+                    "UIApplicationSceneManifest": [
+                        "UIApplicationSupportsMultipleScenes": false,
+                        "UISceneConfigurations": [
+                            "UIWindowSceneSessionRoleApplication": [
+                                [
+                                    "UISceneConfigurationName": "Default Configuration",
+                                    "UISceneDelegateClassName": "$(PRODUCT_MODULE_NAME).SceneDelegate",
+                                ],
+                            ],
+                        ],
+                    ],
                 ]
             ),
             sources: ["Sources/**"],
