@@ -1,12 +1,3 @@
----
-name: PULL_REQUEST_TEMPLATE
-about: 이슈 템플릿
-title: ''
-labels: feat✨
-assignees: ''
-
----
-
 <!--
 PR 제목 작성 가이드: 
 라벨명: 작업한 내용 요약
