@@ -1,0 +1,15 @@
+2026-03-02T19:43:35+0900 debug dev.tuist.cli : /usr/bin/xcrun swift -suppress-warnings -I /opt/homebrew/Caskroom/tuist/4.79.7 -L /opt/homebrew/Caskroom/tuist/4.79.7 -F /opt/homebrew/Caskroom/tuist/4.79.7 -lProjectDescription -framework ProjectDescription /Users/seojeong-won/Desktop/Projects/PinIt/Tuist.swift --tuist-dump
+2026-03-02T19:43:35+0900 debug dev.tuist.cli : 
+2026-03-02T19:43:35+0900 debug dev.tuist.cli : /usr/bin/xcrun swift --version
+2026-03-02T19:43:35+0900 debug dev.tuist.cli : Apple Swift version 6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)
+Target: arm64-apple-macosx26.0
+
+2026-03-02T19:43:35+0900 debug dev.tuist.cli : /usr/bin/env which tuist-generate
+2026-03-02T19:43:35+0900 debug dev.tuist.cli : 
+2026-03-02T19:43:35+0900 debug dev.tuist.cli : Error alert: ✖ Error 
+  - Message: TerminalText(components: [Noora.TerminalText.Component.raw(""), Noora.TerminalText.Component.raw("The command `swift -suppress-warnings -I /opt/homebrew/Caskroom/tuist/4.79.7 -L /opt/homebrew/Caskroom/tuist/4.79.7 -F /opt/homebrew/Caskroom/tuist/4.79.7 -lProjectDescription -framework ProjectDescription /Users/seojeong-won/Desktop/Projects/PinIt/Tuist.swift --tuist-dump` exited with error code 1 and message:\nxcrun: warning: confstr() failed with code 5: couldn\'t get path of DARWIN_USER_TEMP_DIR; using /tmp instead\n<unknown>:0: error: error opening \'/Users/seojeong-won/.cache/clang/ModuleCache/Swift-3FSBVKQ1SWBCU.swiftmodule\' for output: /Users/seojeong-won/.cache/clang/ModuleCache: Operation not permitted\n<unknown>:0: error: unable to load standard library for target \'arm64-apple-macosx26.0\'\n"), Noora.TerminalText.Component.raw("")])
+  - Takeaways:
+    - TerminalText(components: [Noora.TerminalText.Component.raw("If the error is actionable, address it")])
+    - TerminalText(components: [Noora.TerminalText.Component.raw("If the error is not actionable, let\'s discuss it in the "), Noora.TerminalText.Component.link(title: "Troubleshooting & how to", href: "https://community.tuist.dev/c/troubleshooting-how-to/6"), Noora.TerminalText.Component.raw("")])
+    - TerminalText(components: [Noora.TerminalText.Component.raw("If you are very certain it\'s a bug, "), Noora.TerminalText.Component.link(title: "file an issue", href: "https://github.com/tuist/tuist"), Noora.TerminalText.Component.raw("")])
+    - TerminalText(components: [Noora.TerminalText.Component.raw("Check out the logs at "), Noora.TerminalText.Component.raw("/Users/seojeong-won/Desktop/Projects/PinIt/.tuist-state/tuist/logs/644E646F-F0A0-4EEF-8AD4-CA47A11A284A.log"), Noora.TerminalText.Component.raw("")])

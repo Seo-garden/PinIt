@@ -112,6 +112,7 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
+
 # Code Injection
 # After new code Injection tools there's a generated folder /iOSInjectionProject
 # https://github.com/johnno1962/injectionforxcode
@@ -123,12 +124,21 @@ iOSInjectionProject/
 ## Xcode 8 and earlier
 
 ### Xcode Patch ###
-*.xcodeproj/*
+**/*.xcodeproj/*
+**/*.xcworkspace/*
+**/*/Derived
+*.xcworkspace
 !*.xcodeproj/project.pbxproj
 !*.xcodeproj/xcshareddata/
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
 /*.gcno
+
 **/xcshareddata/WorkspaceSettings.xcsettings
+
+# Tuist generated files
+.tuist-state/
+# Swift Package Manager generated files
+Tuist/Package.resolved
 
 # End of https://www.toptal.com/developers/gitignore/api/swift,xcode,macos
