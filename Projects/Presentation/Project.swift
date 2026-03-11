@@ -6,6 +6,7 @@ let project = Project.makeModule(
     product: .framework,
     dependencies: [
         .project(target: "Domain", path: "../Domain"),
+        .external(name: "Expose"),
         .external(name: "RxSwift"),
         .external(name: "RxCocoa"),
         .external(name: "RxRelay")

@@ -138,6 +138,7 @@ iOSInjectionProject/
 
 # Tuist generated files
 .tuist-state/
+graph.png
 # Swift Package Manager generated files
 Tuist/Package.resolved
 
