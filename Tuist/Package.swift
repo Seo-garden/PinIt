@@ -12,7 +12,5 @@ import PackageDescription
 let package = Package(
     name: "PinItDependencies",
     dependencies: [
-        .package(url: "https://github.com/ReactiveX/RxSwift.git", from: "6.10.1"),
-        .package(url: "https://github.com/mandooplz/expose.git", exact: "0.1.2")
     ]
 )
