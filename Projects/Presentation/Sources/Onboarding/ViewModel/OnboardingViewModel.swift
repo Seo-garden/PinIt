@@ -14,6 +14,10 @@ import RxSwift
 public final class OnboardingViewModel {
     // MARK: core
     
+    public init() {
+        
+    }
+    
     
     // MARK: state
     public var pages: [InfoPageViewModel] = []
