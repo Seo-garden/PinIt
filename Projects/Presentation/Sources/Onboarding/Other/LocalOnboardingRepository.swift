@@ -1,5 +1,5 @@
 //
-//  OnboardingDataLoader.swift
+//  LocalOnboardingRepository.swift
 //  Presentation
 //
 //  Created by 김민우 on 3/12/26.
@@ -10,9 +10,9 @@ import OSLog
 
 
 // MARK: value
-actor OnboardingDataLoader {
+actor LocalOnboardingRepository {
     // MARK: core
-    private let logger = Logger(subsystem: "Presentation", category: "OnboardingDataLoader")
+    private let logger = Logger()
     private let defaults: UserDefaults
     private let hasCompletedOnboardingKey = "hasCompletedOnboarding"
 
