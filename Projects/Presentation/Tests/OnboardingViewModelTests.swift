@@ -5,6 +5,5 @@ import Testing
 
 
 // MARK: Tests
-@Test func sampleTest() async throws {
-    
-}
+
+
