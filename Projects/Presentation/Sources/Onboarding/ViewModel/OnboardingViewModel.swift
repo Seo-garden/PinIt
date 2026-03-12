@@ -16,10 +16,14 @@ public final class OnboardingViewModel {
     
     
     // MARK: state
-    public var infoPages: [InfoPageViewModel] = []
+    public var pages: [InfoPageViewModel] = []
+    public var currentPage: InfoPageViewModel? = nil
     
     
     // MARK: action
+    public func fetchInfoPages() async {
+        fatalError("구현 예정")
+    }
     
     
     // MARK: value
