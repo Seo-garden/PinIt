@@ -10,7 +10,7 @@ import OSLog
 
 
 // MARK: value
-actor LocalOnboardingRepository {
+actor LocalOnboardingRepository: LocalOnboaringInterface {
     // MARK: core
     private let logger = Logger()
     private let defaults: UserDefaults

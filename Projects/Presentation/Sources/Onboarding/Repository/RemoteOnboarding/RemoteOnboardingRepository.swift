@@ -10,7 +10,7 @@ import OSLog
 
 
 // MARK: object
-actor RemoteOnboardingRepository {
+actor RemoteOnboardingRepository: RemoteOnboardingInterface {
     // MARK: core
     private let logger = Logger()
     
