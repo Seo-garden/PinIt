@@ -9,6 +9,7 @@ import Foundation
 import OSLog
 
 
+// MARK: value
 actor OnboardingDataLoader {
     // MARK: core
     private let logger = Logger(subsystem: "Presentation", category: "OnboardingDataLoader")
