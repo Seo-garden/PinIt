@@ -88,14 +88,9 @@ public final class OnboardingViewModel {
         self.currentPage = nextPage
         self.isLastPage = isLastPage
     }
-    public func skip() async {
-        guard let lastPage = self.pageContents.last else {
-            logger.error("건너뛸 페이지가 없습니다. 먼저 fetchContetn()를 호출해주세요.")
-            return
-        }
-        
-        self.currentPage = lastPage
-        self.isLastPage = true
+    public func finishOnboarding() async {
+        // mutate
+        logger.error("온보딩 완료 처리 구현 예정입니다.")
     }
     
     

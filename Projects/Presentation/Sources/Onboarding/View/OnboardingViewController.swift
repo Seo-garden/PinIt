@@ -169,7 +169,7 @@ public final class OnboardingViewController: UIViewController {
         skipButton.rx.tap
             .bind {
                 Task {
-                    await self.viewModel.skip()
+                    await self.viewModel.finishOnboarding()
                 }
             }
             .disposed(by: disposeBag)
