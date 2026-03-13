@@ -10,5 +10,10 @@ import Foundation
 
 // MARK: interface
 public protocol RemoteOnboardingInterface: Sendable {
+    // MARK: state
+    var onboardingContent: OnboardingContent? { get async }
+
     
+    // MARK: action
+    func fetchContent() async
 }
