@@ -27,6 +27,10 @@ struct OnboardingViewModelTests {
             // then
             await #expect(onboardingViewModel.currentPage == nil)
         }
+        @Test func setIsFinishedFalse() async throws {
+            // then
+            await #expect(onboardingViewModel.isFinished == false)
+        }
     }
     
     struct FetchInfoPages {
@@ -83,6 +87,17 @@ struct OnboardingViewModelTests {
             
             #expect(currentPage.index == 0)
         }
+        
+        @Test func setIsContentFetchedTrue() async throws {
+            // given
+            try await #require(onboardingViewModel.isContentFetched == false)
+            
+            // when
+            await onboardingViewModel.fetchContent()
+            
+            // then
+            await #expect(onboardingViewModel.isContentFetched == true)
+        }
     }
     
     
@@ -105,6 +120,55 @@ struct OnboardingViewModelTests {
             let nextPage = try #require(await onboardingViewModel.currentPage)
             #expect(nextPage.index == 1)
             #expect(await onboardingViewModel.isLastPage == false)
+        }
+        @Test func setIsLastPageTrue() async throws {
+            // given
+            await onboardingViewModel.fetchContent()
+            
+            let pageCount = await onboardingViewModel.pageContents.count
+            let nextCount = pageCount - 1
+            
+            for _ in 1...nextCount-1 {
+                await onboardingViewModel.next()
+            }
+            
+            try await #require(onboardingViewModel.isLastPage == false)
+            
+            // when
+            await onboardingViewModel.next()
+            
+            // then
+            await #expect(onboardingViewModel.isLastPage == true)
+        }
+        
+        @Test func returnToFirstPageWhenLastPage() async throws {
+            // given
+            await onboardingViewModel.fetchContent()
+            
+            let pageCount = await onboardingViewModel.pageContents.count
+            let nextCount = pageCount - 1
+            
+            for _ in 1...nextCount {
+                await onboardingViewModel.next()
+            }
+            
+            try await #require(onboardingViewModel.isLastPage == true)
+            
+            // when
+            await onboardingViewModel.next()
+            
+            // then
+            await #expect(onboardingViewModel.isLastPage == false)
+            
+            let currentPage = try #require(await onboardingViewModel.currentPage)
+            #expect(currentPage.index == 0)
+        }
+    }
+    
+    struct FinishOnboarding {
+        let onboardingViewModel: OnboardingViewModel
+        init() async throws {
+            self.onboardingViewModel = await OnboardingViewModel()
         }
     }
 }

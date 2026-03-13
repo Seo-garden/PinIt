@@ -41,6 +41,8 @@ public final class OnboardingViewModel {
     @Exposed public var currentPage: OnboardingContent.Page? = nil
     @Exposed public var isLastPage: Bool = false
     
+    @Exposed public var isFinished: Bool = false
+    
     
     // MARK: action
     public func fetchContent() async {
@@ -70,10 +72,21 @@ public final class OnboardingViewModel {
         }
         
         let pageContents = self.pageContents
-        let nextIndex = currentPage.index + 1
+        let pageCount = pageContents.count
+        
         
         
         // compute
+        let nextIndex: Int = {
+            if currentPage.index == pageCount - 1 {
+                return 0
+            } else {
+                return currentPage.index + 1
+            }
+        }()
+        
+        let isNextPageLast = (nextIndex == pageCount - 1)
+        
         let nextPage = pageContents.first { $0.index == nextIndex }
         
         guard let nextPage else {
@@ -81,12 +94,10 @@ public final class OnboardingViewModel {
             return
         }
         
-        let isLastPage = (nextPage.index == pageContents.count - 1)
-        
         
         // mutate
         self.currentPage = nextPage
-        self.isLastPage = isLastPage
+        self.isLastPage = isNextPageLast
     }
     public func finishOnboarding() async {
         // mutate
