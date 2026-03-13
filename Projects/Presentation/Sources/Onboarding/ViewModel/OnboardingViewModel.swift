@@ -33,10 +33,14 @@ public final class OnboardingViewModel {
     internal let localOnboardingRepo: any LocalOnboaringInterface
     internal let remoteOnboardingRepo: any RemoteOnboardingInterface
     
-    @Exposed public private(set) var content: OnboardingContent? = nil
+    @Exposed public private(set) var pageContents: [OnboardingContent.Page] = []
     public var isContentFetched: Bool {
-        self.content != nil
+        self.pageContents.isEmpty == false
     }
+    
+    public var currentPage: OnboardingContent.Page? = nil
+    public var isLastPage: Bool = false
+    
     
     // MARK: action
     public func fetchContent() async {
@@ -52,11 +56,12 @@ public final class OnboardingViewModel {
         let content = await remoteOnboardingRepo.onboardingContent
         
         // mutate
-        self.content = content
+        self.pageContents = content?.pages ?? []
     }
     
     public func next() async {
-        
+        // mutate
+        logger.error("구현 예정입니다.")
     }
     public func skip() async {
         logger.error("구현 예정입니다.")

@@ -181,7 +181,7 @@ public final class OnboardingViewController: UIViewController {
     }
     
     private func bindState() {
-        viewModel.$content.driver
+        viewModel.$pageContents.driver
             .compactMap { $0 }
             .drive(with: self) { owner, content in
                 owner.reloadPages()
@@ -199,10 +199,7 @@ public final class OnboardingViewController: UIViewController {
         NSLayoutConstraint.deactivate(pageWidthConstraints)
         pageWidthConstraints.removeAll()
         
-        guard let content = viewModel.content else {
-            return
-        }
-        let pageViews = content.pages.enumerated().map(makePageView)
+        let pageViews = self.viewModel.pageContents.enumerated().map(makePageView)
         pageViews.forEach { pageView in
             pageStackView.addArrangedSubview(pageView)
             let widthConstraint = pageView.widthAnchor.constraint(equalTo: pagingScrollView.frameLayoutGuide.widthAnchor)
