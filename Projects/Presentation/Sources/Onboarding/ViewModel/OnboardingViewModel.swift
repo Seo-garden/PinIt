@@ -38,8 +38,8 @@ public final class OnboardingViewModel {
         self.pageContents.isEmpty == false
     }
     
-    public var currentPage: OnboardingContent.Page? = nil
-    public var isLastPage: Bool = false
+    @Exposed public var currentPage: OnboardingContent.Page? = nil
+    @Exposed public var isLastPage: Bool = false
     
     
     // MARK: action
@@ -53,18 +53,49 @@ public final class OnboardingViewModel {
         // compute
         await remoteOnboardingRepo.fetchContent()
         
-        let content = await remoteOnboardingRepo.onboardingContent
+        let pageContents = await remoteOnboardingRepo.onboardingContent?.pages
+        let firstPage = pageContents?.first { $0.index == 0 }
         
         // mutate
-        self.pageContents = content?.pages ?? []
+        self.pageContents = pageContents ?? []
+        self.currentPage = firstPage
+        self.isLastPage = (firstPage?.index == self.pageContents.count - 1)
     }
     
     public func next() async {
+        // capture
+        guard let currentPage else {
+            logger.error("현재 페이지가 없습니다. 먼저 fetchContetn()를 호출해주세요.")
+            return
+        }
+        
+        let pageContents = self.pageContents
+        let nextIndex = currentPage.index + 1
+        
+        
+        // compute
+        let nextPage = pageContents.first { $0.index == nextIndex }
+        
+        guard let nextPage else {
+            logger.error("\(nextIndex)에 해당하는 다음 페이지가 존재하지 않습니다.")
+            return
+        }
+        
+        let isLastPage = (nextPage.index == pageContents.count - 1)
+        
+        
         // mutate
-        logger.error("구현 예정입니다.")
+        self.currentPage = nextPage
+        self.isLastPage = isLastPage
     }
     public func skip() async {
-        logger.error("구현 예정입니다.")
+        guard let lastPage = self.pageContents.last else {
+            logger.error("건너뛸 페이지가 없습니다. 먼저 fetchContetn()를 호출해주세요.")
+            return
+        }
+        
+        self.currentPage = lastPage
+        self.isLastPage = true
     }
     
     

@@ -25,6 +25,7 @@ public final class OnboardingViewController: UIViewController {
     private let pagingScrollView = UIScrollView()
     private let pageStackView = UIStackView()
     private let pageControl = UIPageControl()
+    
     private let nextButton = UIButton(type: .system)
     private let skipButton = UIButton(type: .system)
     
@@ -151,31 +152,25 @@ public final class OnboardingViewController: UIViewController {
     private func bindActions() {
         pageControl.rx.controlEvent(.valueChanged)
             .bind(with: self) { owner, _ in
-                owner.scrollToPage(
-                    index: owner.pageControl.currentPage, animated: true)
+                let targetIndex = owner.pageControl.currentPage
+                guard owner.viewModel.pageContents.indices.contains(targetIndex) else { return }
+                owner.viewModel.currentPage = owner.viewModel.pageContents[targetIndex]
             }
             .disposed(by: disposeBag)
-        
+
         nextButton.rx.tap
             .bind(with: self) { owner, _ in
-                guard owner.pageControl.numberOfPages > 0 else { return }
-                
-                if owner.currentPageIndex < owner.pageControl.numberOfPages - 1 {
-                    owner.scrollToPage(
-                        index: owner.currentPageIndex + 1,
-                        animated: true
-                    )
+                Task {
+                    await owner.viewModel.next()
                 }
             }
             .disposed(by: disposeBag)
-        
+
         skipButton.rx.tap
-            .bind(with: self) { owner, _ in
-                guard owner.pageControl.numberOfPages > 0 else { return }
-                owner.scrollToPage(
-                    index: owner.pageControl.numberOfPages - 1,
-                    animated: true
-                )
+            .bind {
+                Task {
+                    await self.viewModel.skip()
+                }
             }
             .disposed(by: disposeBag)
     }
@@ -185,6 +180,13 @@ public final class OnboardingViewController: UIViewController {
             .compactMap { $0 }
             .drive(with: self) { owner, content in
                 owner.reloadPages()
+            }
+            .disposed(by: disposeBag)
+
+        viewModel.$currentPage.driver
+            .compactMap { $0 }
+            .drive(with: self) { owner, page in
+                owner.scrollToPage(index: page.index, animated: true)
             }
             .disposed(by: disposeBag)
     }
@@ -198,16 +200,22 @@ public final class OnboardingViewController: UIViewController {
         }
         NSLayoutConstraint.deactivate(pageWidthConstraints)
         pageWidthConstraints.removeAll()
-        
-        let pageViews = self.viewModel.pageContents.enumerated().map(makePageView)
-        pageViews.forEach { pageView in
-            pageStackView.addArrangedSubview(pageView)
-            let widthConstraint = pageView.widthAnchor.constraint(equalTo: pagingScrollView.frameLayoutGuide.widthAnchor)
-            widthConstraint.isActive = true
-            pageWidthConstraints.append(widthConstraint)
-        }
-        
+
+        let pageViews = self.viewModel.pageContents
+            .sorted { $0.index < $1.index }
+            .map { ($0.index, $0) }
+            .map(makePageView)
+
+        pageViews
+            .forEach { pageView in
+                pageStackView.addArrangedSubview(pageView)
+                let widthConstraint = pageView.widthAnchor.constraint(equalTo: pagingScrollView.frameLayoutGuide.widthAnchor)
+                widthConstraint.isActive = true
+                pageWidthConstraints.append(widthConstraint)
+            }
+
         pageControl.numberOfPages = pageViews.count
+
         currentPageIndex = 0
         pageControl.currentPage = 0
         updateNextButtonTitle()
@@ -266,11 +274,16 @@ public final class OnboardingViewController: UIViewController {
         guard pagingScrollView.bounds.width > 0, pageControl.numberOfPages > 0 else { return }
         let index = Int(round(pagingScrollView.contentOffset.x / pagingScrollView.bounds.width))
         let clampedIndex = max(0, min(index, pageControl.numberOfPages - 1))
-        
+
         guard currentPageIndex != clampedIndex else { return }
         currentPageIndex = clampedIndex
         pageControl.currentPage = clampedIndex
         updateNextButtonTitle()
+
+        guard viewModel.pageContents.indices.contains(clampedIndex) else { return }
+        let page = viewModel.pageContents[clampedIndex]
+        guard viewModel.currentPage?.index != page.index else { return }
+        viewModel.currentPage = page
     }
     
     private func updateNextButtonTitle() {
@@ -281,10 +294,13 @@ public final class OnboardingViewController: UIViewController {
     
     private func scrollToPage(index: Int, animated: Bool) {
         guard pagingScrollView.bounds.width > 0 else { return }
-        let targetOffset = CGPoint(x: pagingScrollView.bounds.width * CGFloat(index), y: 0)
+        guard pageControl.numberOfPages > 0 else { return }
+
+        let clampedIndex = max(0, min(index, pageControl.numberOfPages - 1))
+        let targetOffset = CGPoint(x: pagingScrollView.bounds.width * CGFloat(clampedIndex), y: 0)
         pagingScrollView.setContentOffset(targetOffset, animated: animated)
-        currentPageIndex = index
-        pageControl.currentPage = index
+        currentPageIndex = clampedIndex
+        pageControl.currentPage = clampedIndex
         updateNextButtonTitle()
     }
     
@@ -310,7 +326,12 @@ extension OnboardingViewController: UIScrollViewDelegate {
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         updateCurrentPageIfNeeded()
     }
-    
+
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        guard decelerate == false else { return }
+        updateCurrentPageIfNeeded()
+    }
+
     public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         updateCurrentPageIfNeeded()
     }

@@ -21,7 +21,7 @@ struct OnboardingViewModelTests {
         
         @Test func pagesAreEmpty() async throws {
             // then
-            await #expect(onboardingViewModel.pages.isEmpty == true)
+            await #expect(onboardingViewModel.pageContents.isEmpty == true)
         }
         @Test func currentPagesIsNil() async throws {
             // then
@@ -37,14 +37,74 @@ struct OnboardingViewModelTests {
         
         @Test func appendPages() async throws {
             // given
-            try await #require(onboardingViewModel.pages.isEmpty == true)
+            try await #require(onboardingViewModel.pageContents.isEmpty == true)
             
             // when
-            await onboardingViewModel.fetchInfoPages()
+            await onboardingViewModel.fetchContent()
             
             // then
-            await #expect(onboardingViewModel.pages.isEmpty == false)
+            await #expect(onboardingViewModel.pageContents.isEmpty == false)
+        }
+        @Test func whenAlreadyFetched() async throws {
+            // given
+            try await #require(onboardingViewModel.pageContents.isEmpty)
+            
+            await onboardingViewModel.fetchContent()
+            
+            try await #require(onboardingViewModel.pageContents.isEmpty == false)
+            
+            let pageContents = await onboardingViewModel.pageContents
+            
+            // when
+            await onboardingViewModel.fetchContent()
+            
+            // then
+            let newPageContents = await onboardingViewModel.pageContents
+            
+            #expect(newPageContents == pageContents)
+        }
+        
+        @Test func setCurrentPage() async throws {
+            // given
+            try await #require(onboardingViewModel.currentPage == nil)
+            
+            // when
+            await onboardingViewModel.fetchContent()
+            
+            // then
+            await #expect(onboardingViewModel.currentPage != nil)
+        }
+        @Test func setCurrentPageToFirstPage() async throws {
+            // when
+            await onboardingViewModel.fetchContent()
+            
+            // then
+            let currentPage = try #require(await onboardingViewModel.currentPage)
+            
+            #expect(currentPage.index == 0)
+        }
+    }
+    
+    
+    struct Next {
+        let onboardingViewModel: OnboardingViewModel
+        init() async throws {
+            self.onboardingViewModel = await OnboardingViewModel()
+        }
+        
+        @Test func setCurrentPageToNextPage() async throws {
+            // given
+            await onboardingViewModel.fetchContent()
+            let currentPage = try #require(await onboardingViewModel.currentPage)
+            #expect(currentPage.index == 0)
+            
+            // when
+            await onboardingViewModel.next()
+            
+            // then
+            let nextPage = try #require(await onboardingViewModel.currentPage)
+            #expect(nextPage.index == 1)
+            #expect(await onboardingViewModel.isLastPage == false)
         }
     }
 }
-
