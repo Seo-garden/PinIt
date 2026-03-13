@@ -8,10 +8,11 @@
 import Foundation
 import RxSwift
 import OSLog
+import Expose
 
 
 // MARK: object
-@MainActor
+@MainActor @Exposable
 public final class OnboardingViewModel {
     // MARK: core
     private let logger = Logger()
@@ -32,44 +33,33 @@ public final class OnboardingViewModel {
     internal let localOnboardingRepo: any LocalOnboaringInterface
     internal let remoteOnboardingRepo: any RemoteOnboardingInterface
     
-    public var pages: [InfoPageViewModel] = []
-    public var currentPage: InfoPageViewModel? = nil
-    
+    @Exposed public private(set) var content: OnboardingContent? = nil
+    public var isContentFetched: Bool {
+        self.content != nil
+    }
     
     // MARK: action
-    public func fetchInfoPages() async {
+    public func fetchContent() async {
         // capture
-        guard self.pages.isEmpty == true else {
-            logger.error("이미 pages 프로퍼티가 업데이트된 상태입니다. 현재 \(self.pages.count)개의 페이지가 있습니다.")
+        guard self.isContentFetched == false else {
+            logger.error("이미 content가 업데이트된 상태입니다.")
             return
         }
-
+        
         // compute
         await remoteOnboardingRepo.fetchContent()
-
+        
         let content = await remoteOnboardingRepo.onboardingContent
         
-
-        
-
-
         // mutate
-        guard let content else {
-            logger.error("온보딩 컨텐츠를 불러오지 못했습니다.")
-            return
-        }
+        self.content = content
+    }
+    
+    public func next() async {
         
-        let pages = content.pages
-            .map { pageContent in
-                InfoPageViewModel(
-                    owner: self,
-                    headLine: pageContent.headline,
-                    imageURL: pageContent.imageURL)
-            }
-        
-        self.pages = pages
-        self.currentPage = pages.first
-        
+    }
+    public func skip() async {
+        logger.error("구현 예정입니다.")
     }
     
     

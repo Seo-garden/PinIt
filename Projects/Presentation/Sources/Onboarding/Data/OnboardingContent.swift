@@ -21,13 +21,13 @@ public struct OnboardingContent: Sendable, Hashable, Codable {
         self.pages = pages
     }
     
-    public struct Page: Codable, Sendable, Hashable, Identifiable {
-        public let id: String
+    public struct Page: Codable, Sendable, Hashable {
+        public let index: Int
         public let headline: String
         public let imageURL: String?
         
-        public init(id: String, headline: String, imageURL: String?) {
-            self.id = id
+        public init(index: Int, headline: String, imageURL: String?) {
+            self.index = index
             self.headline = headline
             self.imageURL = imageURL
         }
