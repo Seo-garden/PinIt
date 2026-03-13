@@ -28,5 +28,23 @@ struct OnboardingViewModelTests {
             await #expect(onboardingViewModel.currentPage == nil)
         }
     }
+    
+    struct FetchInfoPages {
+        let onboardingViewModel: OnboardingViewModel
+        init() async throws {
+            self.onboardingViewModel = await OnboardingViewModel()
+        }
+        
+        @Test func appendPages() async throws {
+            // given
+            try await #require(onboardingViewModel.pages.isEmpty == true)
+            
+            // when
+            await onboardingViewModel.fetchInfoPages()
+            
+            // then
+            await #expect(onboardingViewModel.pages.isEmpty == false)
+        }
+    }
 }
 

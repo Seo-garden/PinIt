@@ -43,12 +43,32 @@ public final class OnboardingViewModel {
             logger.error("이미 pages 프로퍼티가 업데이트된 상태입니다. 현재 \(self.pages.count)개의 페이지가 있습니다.")
             return
         }
-        
+
         // compute
-        fatalError("구현 예정")
+        await remoteOnboardingRepo.fetchContent()
+
+        let content = await remoteOnboardingRepo.onboardingContent
         
+
         
+
+
         // mutate
+        guard let content else {
+            logger.error("온보딩 컨텐츠를 불러오지 못했습니다.")
+            return
+        }
+        
+        let pages = content.pages
+            .map { pageContent in
+                InfoPageViewModel(
+                    owner: self,
+                    headLine: pageContent.headline,
+                    imageURL: pageContent.imageURL)
+            }
+        
+        self.pages = pages
+        self.currentPage = pages.first
         
     }
     
