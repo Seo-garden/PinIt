@@ -27,7 +27,8 @@ public final class OnboardingViewController: UIViewController {
     private let pageControl = UIPageControl()
     
     private let nextButton = UIButton(type: .system)
-    private let skipButton = UIButton(type: .system)
+    private let finishButton = UIButton(type: .system)
+    private let buttonStackView = UIStackView()
     
     
     // MARK: lifecycle
@@ -70,12 +71,13 @@ public final class OnboardingViewController: UIViewController {
     
     // MARK: configure
     private func configureHierarchy() {
-        view.addSubview(skipButton)
         view.addSubview(pagingScrollView)
         view.addSubview(pageControl)
-        view.addSubview(nextButton)
+        view.addSubview(buttonStackView)
         
         pagingScrollView.addSubview(pageStackView)
+        buttonStackView.addArrangedSubview(nextButton)
+        buttonStackView.addArrangedSubview(finishButton)
     }
     
     private func configureStyle() {
@@ -97,6 +99,11 @@ public final class OnboardingViewController: UIViewController {
         pageControl.pageIndicatorTintColor = UIColor(white: 0.82, alpha: 1)
         pageControl.hidesForSinglePage = true
         
+        buttonStackView.axis = .horizontal
+        buttonStackView.alignment = .fill
+        buttonStackView.distribution = .fillEqually
+        buttonStackView.spacing = 12
+        
         var nextConfiguration = UIButton.Configuration.filled()
         nextConfiguration.title = "다음"
         nextConfiguration.baseBackgroundColor = UIColor(red: 24 / 255, green: 119 / 255, blue: 242 / 255, alpha: 1)
@@ -106,27 +113,28 @@ public final class OnboardingViewController: UIViewController {
         nextButton.configuration = nextConfiguration
         nextButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
         
-        var skipConfiguration = UIButton.Configuration.plain()
-        skipConfiguration.title = "건너뛰기"
-        skipConfiguration.baseForegroundColor = UIColor(white: 0.45, alpha: 1)
-        skipButton.configuration = skipConfiguration
-        skipButton.titleLabel?.font = .systemFont(ofSize: 15, weight: .semibold)
+        var finishConfiguration = UIButton.Configuration.filled()
+        finishConfiguration.title = "시작하기"
+        finishConfiguration.baseBackgroundColor = .black
+        finishConfiguration.baseForegroundColor = .white
+        finishConfiguration.cornerStyle = .capsule
+        finishConfiguration.contentInsets = NSDirectionalEdgeInsets(top: 18, leading: 20, bottom: 18, trailing: 20)
+        finishButton.configuration = finishConfiguration
+        finishButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
     }
     
     private func configureLayout() {
         [
-            skipButton,
             pagingScrollView,
             pageStackView,
             pageControl,
-            nextButton
+            buttonStackView,
+            nextButton,
+            finishButton
         ].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
         NSLayoutConstraint.activate([
-            skipButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            skipButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            
-            pagingScrollView.topAnchor.constraint(equalTo: skipButton.bottomAnchor, constant: 8),
+            pagingScrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             pagingScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             pagingScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
@@ -139,11 +147,11 @@ public final class OnboardingViewController: UIViewController {
             pageControl.topAnchor.constraint(equalTo: pagingScrollView.bottomAnchor, constant: 16),
             pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
-            nextButton.topAnchor.constraint(equalTo: pageControl.bottomAnchor, constant: 20),
-            nextButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            nextButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            nextButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
-            nextButton.heightAnchor.constraint(equalToConstant: 58),
+            buttonStackView.topAnchor.constraint(equalTo: pageControl.bottomAnchor, constant: 20),
+            buttonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            buttonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            buttonStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+            buttonStackView.heightAnchor.constraint(equalToConstant: 58),
             
             pagingScrollView.bottomAnchor.constraint(equalTo: pageControl.topAnchor, constant: -16)
         ])
@@ -165,11 +173,11 @@ public final class OnboardingViewController: UIViewController {
                 }
             }
             .disposed(by: disposeBag)
-
-        skipButton.rx.tap
-            .bind {
+        
+        finishButton.rx.tap
+            .bind(with: self) { owner, _ in
                 Task {
-                    await self.viewModel.finishOnboarding()
+                    await owner.viewModel.finishOnboarding()
                 }
             }
             .disposed(by: disposeBag)
@@ -216,9 +224,9 @@ public final class OnboardingViewController: UIViewController {
 
         pageControl.numberOfPages = pageViews.count
 
-        currentPageIndex = 0
-        pageControl.currentPage = 0
-        updateNextButtonTitle()
+        currentPageIndex = self.viewModel.currentPage?.index ?? 0
+        pageControl.currentPage = currentPageIndex
+        updateButtonState()
     }
     
     private func makePageView(index: Int, viewModel: OnboardingContent.Page) -> UIView {
@@ -278,18 +286,13 @@ public final class OnboardingViewController: UIViewController {
         guard currentPageIndex != clampedIndex else { return }
         currentPageIndex = clampedIndex
         pageControl.currentPage = clampedIndex
-        updateNextButtonTitle()
 
         guard viewModel.pageContents.indices.contains(clampedIndex) else { return }
         let page = viewModel.pageContents[clampedIndex]
         guard viewModel.currentPage?.index != page.index else { return }
         viewModel.currentPage = page
-    }
-    
-    private func updateNextButtonTitle() {
-        var configuration = nextButton.configuration ?? .filled()
-        configuration.title = currentPageIndex == max(pageControl.numberOfPages - 1, 0) ? "시작하기" : "다음"
-        nextButton.configuration = configuration
+        viewModel.isLastPage = (page.index == viewModel.pageContents.count - 1)
+        updateButtonState()
     }
     
     private func scrollToPage(index: Int, animated: Bool) {
@@ -301,7 +304,13 @@ public final class OnboardingViewController: UIViewController {
         pagingScrollView.setContentOffset(targetOffset, animated: animated)
         currentPageIndex = clampedIndex
         pageControl.currentPage = clampedIndex
-        updateNextButtonTitle()
+        updateButtonState()
+    }
+    
+    private func updateButtonState() {
+        nextButton.isEnabled = viewModel.pageContents.isEmpty == false
+        finishButton.isEnabled = true
+        finishButton.alpha = 1
     }
     
     private func symbolName(for index: Int) -> String {
