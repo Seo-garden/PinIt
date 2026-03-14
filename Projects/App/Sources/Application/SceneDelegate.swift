@@ -11,6 +11,7 @@ import Presentation
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
+    private let diContainer = AppDIContainer()
 
     
     func scene(
@@ -20,7 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
 
-        let rootViewController = HomeViewController()
+        let rootViewController = diContainer.makeCreateRecordViewController()
         let navigationController = UINavigationController(rootViewController: rootViewController)
 
         let window = UIWindow(windowScene: windowScene)
