@@ -20,8 +20,16 @@ final class PhotoPreviewCell: UICollectionViewCell {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+        setupUI()
+        setupLayout()
+    }
+    
+    private func setupUI() {
         contentView.addSubview(imageView)
-        imageView.translatesAutoresizingMaskIntoConstraints = false
+        [imageView].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
+    }
+
+    private func setupLayout() {
         NSLayoutConstraint.activate([
             imageView.topAnchor.constraint(equalTo: contentView.topAnchor),
             imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
