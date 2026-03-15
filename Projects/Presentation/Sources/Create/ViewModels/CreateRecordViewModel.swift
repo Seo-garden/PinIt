@@ -13,23 +13,13 @@ import RxSwift
 
 
 public final class CreateRecordViewModel {
-
-    // MARK: - Constants
-
     public static let maxPhotos = 5
-
-    // MARK: - Dependencies
-
     private let locationSuggestionUseCase: LocationSuggestionUseCase
     private let disposeBag = DisposeBag()
-
-    // MARK: - Init
 
     public init(locationSuggestionUseCase: LocationSuggestionUseCase) {
         self.locationSuggestionUseCase = locationSuggestionUseCase
     }
-
-    // MARK: - Sub-States
 
     public struct PhotoState: Equatable {
         public var photos: [PhotoData] = []
@@ -58,14 +48,10 @@ public final class CreateRecordViewModel {
         }
     }
 
-    // MARK: - State (서브 구조체 조합)
-
     public struct State: Equatable {
         public var photo: PhotoState = .init()
         public var form: FormState = .init()
         public var location: LocationState = .init()
-
-        // MARK: - Derived (VC는 이 값을 그대로 바인딩만 하면 됨)
 
         public var hasPhotos: Bool {
             !photo.photos.isEmpty
@@ -98,8 +84,6 @@ public final class CreateRecordViewModel {
         case setSuggestions([SuggestedLocation])
         case applySuggestion(Int)
     }
-
-    // MARK: - Reduce (순수 함수)
 
     private static func reduce(_ state: State, _ mutation: Mutation) -> State {
         var newState = state
@@ -137,15 +121,12 @@ public final class CreateRecordViewModel {
             }
         }
 
-        // 사진이 비면 위치 정보 초기화 (setPhotos / deletePhoto 공통)
         if newState.photo.photos.isEmpty {
             newState.location.reset()
         }
 
         return newState
     }
-
-    // MARK: - Input / Output
 
     public struct Input {
         public let takePhotoTap: Signal<Void>
@@ -168,13 +149,9 @@ public final class CreateRecordViewModel {
         public let photoDeleted: Signal<Int>
     }
 
-    // MARK: - Transform
-
     public func transform(input: Input) -> Output {
-        // 단일 상태 저장소: BehaviorRelay만 사용, scan 없음
         let state = BehaviorRelay<State>(value: State())
 
-        // 1. Read-only outputs (상태를 읽기만 하고 변경하지 않음)
         let requestCamera = input.takePhotoTap.asObservable()
             .withLatestFrom(state)
             .filter { $0.photo.photos.count < Self.maxPhotos }
@@ -193,7 +170,6 @@ public final class CreateRecordViewModel {
             .map { _ in RecordAlert.photoLimitReached.message }
             .asSignal(onErrorSignalWith: .empty())
 
-        // 2. Mutations
         let setPhotosMutation = input.addPhotos.asObservable()
             .withLatestFrom(state) { newPhotos, current -> Mutation in
                 let combined = current.photo.photos + newPhotos
@@ -220,7 +196,6 @@ public final class CreateRecordViewModel {
         let applySuggestionMutation = input.selectSuggestedLocation.asObservable()
             .map { Mutation.applySuggestion($0) }
 
-        // Fetch suggestions when photos change (add or delete)
         let suggestionsMutation = Observable.merge(setPhotosMutation, deletePhotoMutation)
             .withLatestFrom(state) { _, current in current.photo.photos }
             .flatMapLatest { [weak self] photos -> Observable<[SuggestedLocation]> in
@@ -235,7 +210,6 @@ public final class CreateRecordViewModel {
             }
             .map { Mutation.setSuggestions($0) }
 
-        // 3. 단일 상태 갱신: merge → reduce → relay.accept
         Observable.merge([
             setPhotosMutation,
             deletePhotoMutation,
@@ -250,10 +224,8 @@ public final class CreateRecordViewModel {
         })
         .disposed(by: disposeBag)
 
-        // 4. UI 바인딩용 Driver (BehaviorRelay는 초기값을 자동 replay)
         let drivenState = state.asDriver()
 
-        // 5. Finish — state relay가 유일한 상태 저장소이므로 항상 최신 상태 보장
         let finish = input.recordTap.asObservable()
             .withLatestFrom(state)
             .filter { s in
@@ -270,7 +242,6 @@ public final class CreateRecordViewModel {
             }
             .asSignal(onErrorSignalWith: .empty())
 
-        // 6. Side effect for UI (CollectionView deletion animation sync)
         let photoDeleted = deletePhotoMutation
             .compactMap { mutation -> Int? in
                 if case .deletePhoto(let index) = mutation { return index }
