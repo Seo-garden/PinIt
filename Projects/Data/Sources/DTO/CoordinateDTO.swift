@@ -17,7 +17,7 @@ public struct CoordinateDTO {
         self.longitude = longitude
     }
 
-    public func toDomain() -> Coordinate {
+    public func toDomain() -> Coordinate? {
         return Coordinate(latitude: latitude, longitude: longitude)
     }
 }
