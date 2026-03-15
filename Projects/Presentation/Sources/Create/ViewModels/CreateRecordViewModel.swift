@@ -122,7 +122,10 @@ public final class CreateRecordViewModel {
             newState.location.locationName = name
         case .setSuggestions(let suggestions):
             newState.location.suggestions = suggestions
-            if !suggestions.isEmpty, newState.location.locationName == nil {
+            if suggestions.isEmpty {
+                newState.location.coordinate = nil
+                newState.location.locationName = nil
+            } else if newState.location.locationName == nil {
                 newState.location.coordinate = suggestions[0].coordinate
                 newState.location.locationName = suggestions[0].title
             }
@@ -217,12 +220,9 @@ public final class CreateRecordViewModel {
         let applySuggestionMutation = input.selectSuggestedLocation.asObservable()
             .map { Mutation.applySuggestion($0) }
 
-        // Fetch suggestions when photos change
-        let suggestionsMutation = setPhotosMutation
-            .compactMap { mutation -> [PhotoData]? in
-                if case .setPhotos(let photos) = mutation { return photos }
-                return nil
-            }
+        // Fetch suggestions when photos change (add or delete)
+        let suggestionsMutation = Observable.merge(setPhotosMutation, deletePhotoMutation)
+            .withLatestFrom(state) { _, current in current.photo.photos }
             .flatMapLatest { [weak self] photos -> Observable<[SuggestedLocation]> in
                 guard let self = self else { return .empty() }
                 return Observable.create { observer in
