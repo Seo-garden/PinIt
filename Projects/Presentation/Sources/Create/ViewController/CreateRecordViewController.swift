@@ -277,7 +277,7 @@ public final class CreateRecordViewController: UIViewController {
             case .unavailable:
                 coordinator.showAlert(from: self, title: CreateRecordStrings.cameraUnavailableMessage, message: "")
             case .accessDenied:
-                coordinator.showAlert(from: self, title: "접근 거부", message: error.localizedDescription)
+                coordinator.showAlert(from: self, title: CreateRecordStrings.cameraDeniedMessage, message: error.localizedDescription)
             case .loadFailed:
                 coordinator.showAlert(from: self, title: CreateRecordStrings.photoErrorMessage, message: error.localizedDescription)
             }
