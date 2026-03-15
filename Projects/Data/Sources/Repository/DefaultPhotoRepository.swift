@@ -29,6 +29,7 @@ public final class DefaultPhotoRepository: PhotoRepository {
 
         let group = DispatchGroup()
         var collected: [PhotoData] = []
+        var hasFailure = false
         let syncQueue = DispatchQueue(label: "photo.repository.queue")
 
         assets.enumerateObjects { asset, _, _ in
@@ -36,9 +37,17 @@ public final class DefaultPhotoRepository: PhotoRepository {
             let options = PHImageRequestOptions()
             options.isNetworkAccessAllowed = true
             options.version = .current
-            PHImageManager.default().requestImageDataAndOrientation(for: asset, options: options) { data, _, _, _ in
+            PHImageManager.default().requestImageDataAndOrientation(for: asset, options: options) { data, _, _, info in
                 defer { group.leave() }
-                guard let data = data else { return }
+                if let error = info?[PHImageErrorKey] as? Error {
+                    debugPrint("[PhotoRepository] asset load failed: \(error.localizedDescription)")
+                    syncQueue.async { hasFailure = true }
+                    return
+                }
+                guard let data = data else {
+                    syncQueue.async { hasFailure = true }
+                    return
+                }
                 let coordinateDTO = EXIFCoordinateExtractor.extractCoordinate(fromData: data)
                     ?? asset.location.map { CoordinateDTO(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude) }
                 let photoDTO = PhotoDataDTO(imageData: data, coordinate: coordinateDTO)
@@ -48,7 +57,11 @@ public final class DefaultPhotoRepository: PhotoRepository {
 
         group.notify(queue: .main) {
             syncQueue.sync {}
-            completion(.success(collected))
+            if hasFailure {
+                completion(.failure(.loadFailed))
+            } else {
+                completion(.success(collected))
+            }
         }
     }
 }
