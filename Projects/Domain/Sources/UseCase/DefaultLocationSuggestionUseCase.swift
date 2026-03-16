@@ -45,14 +45,6 @@ public final class DefaultLocationSuggestionUseCase: LocationSuggestionUseCase {
         }
     }
     
-    public func resolve(from photos: [PhotoData]) async -> [SuggestedLocation] {
-        await withCheckedContinuation { continuation in
-            resolve(from: photos) { result in
-                continuation.resume(returning: result)
-            }
-        }
-    }
-    
     private func uniqueCoordinates(_ coords: [Coordinate]) -> [Coordinate] {
         var seen: Set<String> = []
         var ordered: [Coordinate] = []

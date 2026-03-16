@@ -9,5 +9,4 @@ import Foundation
 
 public protocol LocationSuggestionUseCase {
     func resolve(from photos: [PhotoData], completion: @escaping ([SuggestedLocation]) -> Void)
-    func resolve(from photos: [PhotoData]) async -> [SuggestedLocation]
 }

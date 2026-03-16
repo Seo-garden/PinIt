@@ -40,7 +40,6 @@ public final class CreateRecordViewController: UIViewController {
     }
 
     // MARK: - Lifecycle
-
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -186,7 +185,6 @@ public final class CreateRecordViewController: UIViewController {
         previousState = state
         currentPhotos = state.photo.photos
 
-        // --- Photo State ---
         if photoChanged {
             recordView.photoEmptyLabel.isHidden = state.hasPhotos
             recordView.pageBadgeLabel.isHidden = !state.hasPhotos
@@ -207,13 +205,11 @@ public final class CreateRecordViewController: UIViewController {
             }
         }
 
-        // --- Form State ---
         if formChanged {
             recordView.captionInputView.setText(state.form.caption)
             recordView.captionCountLabel.text = state.captionCountText
         }
 
-        // --- Location State ---
         if locationChanged {
             recordView.locationField.configure(
                 text: state.location.locationName,
@@ -234,14 +230,11 @@ public final class CreateRecordViewController: UIViewController {
             recordView.mapView.setRegion(region, animated: shouldAnimate)
         }
 
-        // --- Record Button (photo + form 모두 관여) ---
         if photoChanged || formChanged {
             recordView.recordButton.isEnabled = state.isRecordEnabled
             recordView.recordButton.alpha = state.isRecordEnabled ? 1.0 : 0.5
         }
     }
-
-    // MARK: - Actions
 
     @objc private func didTapCancel() {
         coordinator.dismiss(from: self)
@@ -267,7 +260,6 @@ public final class CreateRecordViewController: UIViewController {
     }
 
     // MARK: - Helpers
-
     private func handlePhotoResult(_ result: Result<[PhotoData], PhotoError>) {
         switch result {
         case .success(let photos):
