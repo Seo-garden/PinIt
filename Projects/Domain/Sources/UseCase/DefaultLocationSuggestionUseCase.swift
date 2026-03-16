@@ -28,12 +28,10 @@ public final class DefaultLocationSuggestionUseCase: LocationSuggestionUseCase {
         for (index, coord) in coords.enumerated() {
             group.enter()
             reverseGeocodeUseCase.execute(coordinate: coord) { address in
-                if let address = address {
-                    queue.async {
+                queue.async {
+                    if let address = address {
                         results.append((index, SuggestedLocation(coordinate: coord, title: address)))
-                        group.leave()
                     }
-                } else {
                     group.leave()
                 }
             }
@@ -47,20 +45,6 @@ public final class DefaultLocationSuggestionUseCase: LocationSuggestionUseCase {
     
     private func uniqueCoordinates(_ coords: [Coordinate]) -> [Coordinate] {
         var seen: Set<String> = []
-        var ordered: [Coordinate] = []
-        for coord in coords {
-            let key = coordinateKey(coord)
-            if !seen.contains(key) {
-                seen.insert(key)
-                ordered.append(coord)
-            }
-        }
-        return ordered
-    }
-    
-    private func coordinateKey(_ coord: Coordinate) -> String {
-        let lat = (coord.latitude * 1e5).rounded() / 1e5
-        let lon = (coord.longitude * 1e5).rounded() / 1e5
-        return "\(lat)_\(lon)"
+        return coords.filter { seen.insert($0.uniqueKey()).inserted }
     }
 }

@@ -26,4 +26,11 @@ public extension Coordinate {
     func isApproximatelyEqual(to other: Coordinate, epsilon: Double = 0.00001) -> Bool {
         abs(latitude - other.latitude) < epsilon && abs(longitude - other.longitude) < epsilon
     }
+
+    func uniqueKey(precision: Int = 5) -> String {
+        let factor = pow(10.0, Double(precision))
+        let lat = (latitude * factor).rounded() / factor
+        let lon = (longitude * factor).rounded() / factor
+        return "\(lat)_\(lon)"
+    }
 }
