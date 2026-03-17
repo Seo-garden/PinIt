@@ -11,7 +11,7 @@ public protocol ReverseGeocodeUseCase {
     func execute(coordinate: Coordinate, completion: @escaping (String?) -> Void)
 }
 
-public final class DefaultReverseGeocodeUseCase: ReverseGeocodeUseCase {
+public struct DefaultReverseGeocodeUseCase: ReverseGeocodeUseCase {
     private let repository: GeocodingRepository
 
     public init(repository: GeocodingRepository) {

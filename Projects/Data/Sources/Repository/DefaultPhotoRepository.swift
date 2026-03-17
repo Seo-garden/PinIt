@@ -1,5 +1,5 @@
 //
-//  PhotoRepositoryImpl.swift
+//  DefaultPhotoRepository.swift
 //  Data
 //
 //  Created by 서정원 on 3/13/26.
@@ -10,7 +10,7 @@ import Domain
 import Foundation
 import Photos
 
-public final class DefaultPhotoRepository: PhotoRepository {
+public struct DefaultPhotoRepository: PhotoRepository {
     public init() {}
 
     public func loadFromCamera(imageData: Data, metadata: [AnyHashable: Any], completion: @escaping (Result<[PhotoData], PhotoError>) -> Void) {

@@ -9,7 +9,7 @@ import CoreLocation
 import Domain
 import Foundation
 
-public final class DefaultGeocodingRepository: GeocodingRepository {
+public struct DefaultGeocodingRepository: GeocodingRepository {
     private let geocoderProvider: () -> CLGeocoder
 
     public init(geocoderProvider: @escaping () -> CLGeocoder = { CLGeocoder() }) {

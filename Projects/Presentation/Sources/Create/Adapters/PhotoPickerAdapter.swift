@@ -56,8 +56,11 @@ extension PhotoPickerAdapter: UIImagePickerControllerDelegate, UINavigationContr
             guard let self else { return }
             guard let image = info[.originalImage] as? UIImage,
                   let imageData = image.jpegData(compressionQuality: 1.0) else {
-                self.completion?(.failure(.loadFailed)); self.completion = nil; return
+                self.completion?(.failure(.loadFailed))
+                self.completion = nil
+                return
             }
+            
             let metadata = info[.mediaMetadata] as? [AnyHashable: Any] ?? [:]
             self.photoRepository.loadFromCamera(imageData: imageData, metadata: metadata) { [weak self] result in
                 self?.completion?(result)

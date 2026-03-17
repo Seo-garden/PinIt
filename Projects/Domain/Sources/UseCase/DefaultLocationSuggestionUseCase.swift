@@ -7,7 +7,11 @@
 
 import Foundation
 
-public final class DefaultLocationSuggestionUseCase: LocationSuggestionUseCase {
+public protocol LocationSuggestionUseCase {
+    func resolve(from photos: [PhotoData], completion: @escaping ([SuggestedLocation]) -> Void)
+}
+
+public struct DefaultLocationSuggestionUseCase: LocationSuggestionUseCase {
     private let reverseGeocodeUseCase: ReverseGeocodeUseCase
     
     public init(reverseGeocodeUseCase: ReverseGeocodeUseCase) {
