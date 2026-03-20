@@ -17,11 +17,9 @@ public protocol MemoryComposeDelegate: AnyObject {
     func memoryComposeDidCancel(_ viewController: CreateRecordViewController)
 }
 
-public final class CreateRecordViewController: UIViewController {
-    private let viewModel: CreateRecordViewModel
+public final class CreateRecordViewController: BaseViewController<CreateRecordViewModel> {
     private let coordinator: CreateRecordCoordinator
     public weak var delegate: MemoryComposeDelegate?
-    private let disposeBag = DisposeBag()
     private let addPhotosRelay = PublishRelay<[PhotoData]>()
     private let currentPageRelay = PublishRelay<Int>()
     private let selectSuggestedLocationRelay = PublishRelay<Int>()
@@ -29,24 +27,14 @@ public final class CreateRecordViewController: UIViewController {
     private var currentPhotos: [PhotoData] = []
 
     public init(viewModel: CreateRecordViewModel, coordinator: CreateRecordCoordinator) {
-        self.viewModel = viewModel
         self.coordinator = coordinator
-        super.init(nibName: nil, bundle: nil)
-        self.coordinator.hostViewController = self
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(viewModel: viewModel)
     }
 
     // MARK: - Lifecycle
     public override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
-        setupLayout()
-        view.backgroundColor = .systemBackground
         title = CreateRecordStrings.newMemoryTitle
-        bind()
     }
 
     public override func viewDidLayoutSubviews() {
@@ -65,7 +53,7 @@ public final class CreateRecordViewController: UIViewController {
     }
 
     // MARK: - Setup
-    private func setupUI() {
+    public override func setupUI() {
         view.addSubview(recordView)
         [recordView].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
 
@@ -82,7 +70,7 @@ public final class CreateRecordViewController: UIViewController {
         }
     }
 
-    private func setupLayout() {
+    public override func setupLayout() {
         NSLayoutConstraint.activate([
             recordView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             recordView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -91,7 +79,7 @@ public final class CreateRecordViewController: UIViewController {
         ])
     }
 
-    private func bind() {
+    public override func bind() {
         let input = CreateRecordViewModel.Input(
             takePhotoTap: recordView.takePhotoButton.rx.tap.asSignal(),
             galleryTap: recordView.galleryButton.rx.tap.asSignal(),
@@ -296,7 +284,6 @@ public final class CreateRecordViewController: UIViewController {
 }
 
 // MARK: - CollectionView
-
 extension CreateRecordViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         currentPhotos.count
