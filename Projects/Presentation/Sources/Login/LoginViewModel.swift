@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseAuth
 import RxCocoa
 import RxRelay
 import RxSwift
@@ -15,9 +16,11 @@ import OSLog
 // MARK: object
 @MainActor
 public final class LoginViewModel: MWBaseViewModel, MWViewModelType {
+    private let authManagerRepository: any AuthManagerRepositoryType
     private let logger = Logger()
 
-    public override init() {
+    public init(authManagerRepository: any AuthManagerRepositoryType = AuthManagerRepository()) {
+        self.authManagerRepository = authManagerRepository
         super.init()
     }
 
@@ -78,13 +81,19 @@ public final class LoginViewModel: MWBaseViewModel, MWViewModelType {
                 isLoadingRelay.accept(true)
                 logger.log("Login requested for \(email, privacy: .private(mask: .hash))")
 
-                Observable
-                    .just("로그인 준비가 완료되었습니다.")
-                    .delay(.milliseconds(300), scheduler: MainScheduler.instance)
-                    .subscribe(onNext: { message in
-                        isLoadingRelay.accept(false)
-                        loginSucceededRelay.accept(message)
-                    })
+                self.authManagerRepository.signIn(email: email, password: password)
+                    .observe(on: MainScheduler.instance)
+                    .subscribe(
+                        onSuccess: { message in
+                            isLoadingRelay.accept(false)
+                            loginSucceededRelay.accept("\(message) 계정으로 로그인되었습니다.")
+                        },
+                        onFailure: { error in
+                            self.logger.error("Login failed: \(error.localizedDescription, privacy: .public)")
+                            isLoadingRelay.accept(false)
+                            errorMessageRelay.accept(Self.makeErrorMessage(from: error))
+                        }
+                    )
                     .disposed(by: self.disposeBag)
             })
             .disposed(by: disposeBag)
@@ -95,6 +104,31 @@ public final class LoginViewModel: MWBaseViewModel, MWViewModelType {
             errorMessage: errorMessageRelay.asSignal(),
             loginSucceeded: loginSucceededRelay.asSignal()
         )
+    }
+
+    private static func makeErrorMessage(from error: Error) -> String {
+        if let authError = error as? AuthManagerRepositoryError {
+            return authError.localizedDescription
+        }
+
+        guard let errorCode = AuthErrorCode(rawValue: (error as NSError).code) else {
+            return "로그인에 실패했습니다. 잠시 후 다시 시도해주세요."
+        }
+
+        switch errorCode {
+        case .wrongPassword, .invalidCredential:
+            return "이메일 또는 비밀번호를 다시 확인해주세요."
+        case .invalidEmail:
+            return "올바른 이메일 형식을 입력해주세요."
+        case .userNotFound:
+            return "등록되지 않은 계정입니다."
+        case .networkError:
+            return "네트워크 연결을 확인해주세요."
+        case .tooManyRequests:
+            return "요청이 너무 많습니다. 잠시 후 다시 시도해주세요."
+        default:
+            return "로그인에 실패했습니다. 잠시 후 다시 시도해주세요."
+        }
     }
 
     private static func isValidEmail(_ email: String) -> Bool {

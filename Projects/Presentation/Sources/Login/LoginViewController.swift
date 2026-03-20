@@ -25,7 +25,7 @@ public final class LoginViewController: MWBaseViewController<LoginViewModel> {
     private let passwordTextField = UITextField()
     private let loginButton = UIButton(type: .system)
 
-    public override init(viewModel: LoginViewModel = LoginViewModel()) {
+    public override init(viewModel: LoginViewModel) {
         super.init(viewModel: viewModel)
     }
 
@@ -279,5 +279,5 @@ public final class LoginViewController: MWBaseViewController<LoginViewModel> {
 
 
 #Preview {
-    LoginViewController()
+    LoginViewController(viewModel: LoginViewModel())
 }

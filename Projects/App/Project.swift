@@ -27,12 +27,13 @@ let project = Project.makeModule(
     ),
     sources: ["Sources/**"],
     resources: [
-        "Resources/Assets.xcassets"
+        "Resources/**"
     ],
     dependencies: [
         .project(target: "Core", path: "../Core"),
         .project(target: "Domain", path: "../Domain"),
         .project(target: "Data", path: "../Data"),
-        .project(target: "Presentation", path: "../Presentation")
+        .project(target: "Presentation", path: "../Presentation"),
+        .external(name: "FirebaseCore")
     ]
 )

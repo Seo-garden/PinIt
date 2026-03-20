@@ -9,6 +9,7 @@ import Data
 import Domain
 import Presentation
 
+@MainActor
 final class AppDIContainer {
     // MARK: - Repository
     private lazy var geocodingRepository: GeocodingRepository = DefaultGeocodingRepository()
@@ -22,6 +23,11 @@ final class AppDIContainer {
     private lazy var photoPickerAdapter: PhotoPickerAdaptable = PhotoPickerAdapter(photoRepository: photoRepository)
     
     // MARK: - Factory
+    func makeLoginViewController() -> LoginViewController {
+        let viewModel = LoginViewModel(authManagerRepository: AuthManagerRepository())
+        return LoginViewController(viewModel: viewModel)
+    }
+
     func makeCreateRecordViewController() -> CreateRecordViewController {
         let viewModel = CreateRecordViewModel(locationSuggestionUseCase: locationSuggestionUseCase)
         let coordinator = CreateRecordCoordinator(photoAdapter: photoPickerAdapter)

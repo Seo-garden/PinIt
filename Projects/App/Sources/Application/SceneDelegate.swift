@@ -21,7 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
 
-        let rootViewController = diContainer.makeCreateRecordViewController()
+        let rootViewController = diContainer.makeLoginViewController()
         let navigationController = UINavigationController(rootViewController: rootViewController)
 
         let window = UIWindow(windowScene: windowScene)
