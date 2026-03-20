@@ -12,5 +12,6 @@ import PackageDescription
 let package = Package(
     name: "PinItDependencies",
     dependencies: [
+        .package(url: "https://github.com/mandooplz/expose.git", from: "0.1.2")
     ]
 )
