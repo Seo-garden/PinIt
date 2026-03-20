@@ -11,12 +11,10 @@ import RxCocoa
 import RxRelay
 import RxSwift
 
-
-public final class CreateRecordViewModel {
+public final class CreateRecordViewModel: ViewModelType {
     public static let maxPhotos = 5
     private let locationSuggestionUseCase: LocationSuggestionUseCase
-    private let disposeBag = DisposeBag()
-
+    private var disposeBag = DisposeBag()
     public init(locationSuggestionUseCase: LocationSuggestionUseCase) {
         self.locationSuggestionUseCase = locationSuggestionUseCase
     }
