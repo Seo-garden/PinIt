@@ -8,20 +8,21 @@
 import UIKit
 import RxSwift
 
-class MWBaseViewController<VM: MWViewModelType>: UIViewController {
+public class MWBaseViewController<VM: MWViewModelType>: UIViewController {
     let viewModel: VM
     var disposeBag = DisposeBag()
     
-    init(viewModel: VM) {
+    public init(viewModel: VM) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
     
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupLayout()

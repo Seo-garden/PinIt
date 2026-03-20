@@ -5,7 +5,8 @@
 //  Created by 김민우 on 3/20/26.
 //
 
-protocol MWViewModelType {
+@MainActor
+public protocol MWViewModelType {
     associatedtype Input
     associatedtype Output
     

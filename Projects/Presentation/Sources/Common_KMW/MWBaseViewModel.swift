@@ -7,7 +7,7 @@
 
 import RxSwift
 
-internal class MWBaseViewModel {
+public class MWBaseViewModel {
     var disposeBag = DisposeBag()
     
     deinit {
