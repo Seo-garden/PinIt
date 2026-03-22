@@ -14,9 +14,9 @@ public enum PhotoError: LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .accessDenied: return "Access to the requested resource was denied."
-        case .unavailable: return "The requested resource is not available on this device."
-        case .loadFailed: return "Could not load the selected photo."
+        case .accessDenied: return "사진 접근 권한이 거부되었습니다."
+        case .unavailable: return "이 기기에서는 해당 기능을 사용할 수 없습니다."
+        case .loadFailed: return "선택한 사진을 불러오는 데 실패했습니다."
         }
     }
 }

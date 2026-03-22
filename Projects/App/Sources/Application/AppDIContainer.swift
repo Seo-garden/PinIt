@@ -8,21 +8,40 @@
 import Data
 import Domain
 import Presentation
+import UIKit
 
 final class AppDIContainer {
     // MARK: - Repository
     private lazy var geocodingRepository: GeocodingRepository = DefaultGeocodingRepository()
     private lazy var photoRepository: PhotoRepository = DefaultPhotoRepository()
+    private lazy var locationRepository: LocationRepository = DefaultLocationRepository()
 
     // MARK: - UseCase
     private lazy var reverseGeocodeUseCase: ReverseGeocodeUseCase = DefaultReverseGeocodeUseCase(repository: geocodingRepository)
     private lazy var locationSuggestionUseCase: LocationSuggestionUseCase = DefaultLocationSuggestionUseCase(reverseGeocodeUseCase: reverseGeocodeUseCase)
+    private lazy var fetchUserLocationUseCase: FetchUserLocationUseCase = DefaultFetchUserLocationUseCase(repository: locationRepository)
 
     // MARK: - Adapter
     private lazy var photoPickerAdapter: PhotoPickerAdaptable = PhotoPickerAdapter(photoRepository: photoRepository)
     
     // MARK: - Factory
-    func makeCreateRecordViewController() -> CreateRecordViewController {
+    func makeMainTabBarController() -> TabBarViewController {
+        return TabBarViewController(
+            mapViewController: makeMapViewController(),
+            feedViewController: makeFeedViewController(),
+            createRecordViewController: makeCreateRecordViewController()
+        )
+    }
+
+    private func makeMapViewController() -> MapViewController {
+        return MapViewController(viewModel: MapViewModel(fetchUserLocationUseCase: fetchUserLocationUseCase))
+    }
+
+    private func makeFeedViewController() -> FeedViewController {
+        return FeedViewController(viewModel: FeedViewModel())
+    }
+
+    private func makeCreateRecordViewController() -> CreateRecordViewController {
         let viewModel = CreateRecordViewModel(locationSuggestionUseCase: locationSuggestionUseCase)
         let coordinator = CreateRecordCoordinator(photoAdapter: photoPickerAdapter)
         return CreateRecordViewController(
