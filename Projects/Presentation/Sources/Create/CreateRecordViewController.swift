@@ -19,6 +19,8 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
     private let selectSuggestedLocationRelay = PublishRelay<Int>()
     private let recordView = RecordView(showsPhotoActions: true)
     private var currentPhotos: [PhotoData] = []
+    
+    private let closeButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil)
 
     public init(viewModel: CreateRecordViewModel, coordinator: CreateRecordCoordinator) {
         self.coordinator = coordinator
@@ -29,12 +31,6 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
     public override func viewDidLoad() {
         super.viewDidLoad()
         title = AppStrings.Record.newMemoryTitle
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "xmark"),
-            style: .plain,
-            target: self,
-            action: #selector(didTapClose)
-        )
     }
 
     public override func viewDidLayoutSubviews() {
@@ -68,6 +64,8 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
         recordView.suggestionButtons.forEach {
             $0.addTarget(self, action: #selector(didTapSuggestionChip(_:)), for: .touchUpInside)
         }
+        
+        navigationItem.leftBarButtonItem = closeButton
     }
 
     public override func setupLayout() {
@@ -91,6 +89,10 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
             selectSuggestedLocation: selectSuggestedLocationRelay.asSignal(onErrorSignalWith: .empty()),
             recordTap: recordView.recordButton.rx.tap.asSignal()
         )
+        
+        closeButton.rx.tap
+            .subscribe(onNext: { [weak self] in self?.dismiss(animated: true) })
+            .disposed(by: disposeBag)
 
         let output = viewModel.transform(input: input)
 
@@ -218,10 +220,6 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
             recordView.recordButton.isEnabled = state.isRecordEnabled
             recordView.recordButton.alpha = state.isRecordEnabled ? 1.0 : 0.5
         }
-    }
-
-    @objc private func didTapClose() {
-        dismiss(animated: true)
     }
 
     @objc private func didTapSuggestionChip(_ sender: UIButton) {
