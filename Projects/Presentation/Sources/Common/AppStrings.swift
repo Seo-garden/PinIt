@@ -14,7 +14,7 @@ enum AppStrings {
     }
 
     enum Record {
-        static let newMemoryTitle = NSLocalizedString("record.title", value: "New Memory", comment: "")
+        static let newMemoryTitle = NSLocalizedString("record.title", value: "오늘을 남기기", comment: "")
         static let cameraDeniedTitle = NSLocalizedString("record.alert.cameraDenied.title", value: "카메라 접근이 거부되었습니다.", comment: "")
         static let cameraDeniedMessage = NSLocalizedString("record.alert.cameraDenied.message", value: "해당 기능을 사용하려면 카메라에서 권한을 허용해주세요.", comment: "")
         static let galleryDeniedTitle = NSLocalizedString("record.alert.galleryDenied.title", value: "사진 보관함 접근이 거부되었습니다.", comment: "")
