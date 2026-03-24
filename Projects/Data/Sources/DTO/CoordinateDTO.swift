@@ -6,7 +6,6 @@
 //
 
 import Domain
-import Foundation
 
 public struct CoordinateDTO {
     public let latitude: Double

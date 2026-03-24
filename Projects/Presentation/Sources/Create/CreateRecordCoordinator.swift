@@ -6,7 +6,6 @@
 //
 
 import AVFoundation
-import CoreLocation
 import Domain
 import Photos
 import UIKit
