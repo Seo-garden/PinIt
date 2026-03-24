@@ -11,10 +11,13 @@ import UIKit
 
 public final class PhotoPickerAdapter: NSObject, PhotoPickerAdaptable {
     private let photoRepository: PhotoRepository
+    private let fetchUserLocationUseCase: FetchUserLocationUseCase
     private var completion: ((Result<[PhotoData], PhotoError>) -> Void)?
+    private var fallbackCoordinate: Coordinate?
 
-    public init(photoRepository: PhotoRepository) {
+    public init(photoRepository: PhotoRepository, fetchUserLocationUseCase: FetchUserLocationUseCase) {
         self.photoRepository = photoRepository
+        self.fetchUserLocationUseCase = fetchUserLocationUseCase
         super.init()
     }
 
@@ -24,6 +27,12 @@ public final class PhotoPickerAdapter: NSObject, PhotoPickerAdaptable {
             return
         }
         self.completion = completion
+        self.fallbackCoordinate = nil
+        fetchUserLocationUseCase.execute { [weak self] result in
+            if case .success(let coordinate) = result {
+                self?.fallbackCoordinate = coordinate
+            }
+        }
         let picker = UIImagePickerController()
         picker.sourceType = .camera
         picker.delegate = self
@@ -47,6 +56,7 @@ public final class PhotoPickerAdapter: NSObject, PhotoPickerAdaptable {
 extension PhotoPickerAdapter: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true) { [weak self] in
+            self?.fallbackCoordinate = nil
             self?.completion = nil
         }
     }
@@ -62,8 +72,21 @@ extension PhotoPickerAdapter: UIImagePickerControllerDelegate, UINavigationContr
             }
             
             let metadata = info[.mediaMetadata] as? [AnyHashable: Any] ?? [:]
+            let fallback = self.fallbackCoordinate
             self.photoRepository.loadFromCamera(imageData: imageData, metadata: metadata) { [weak self] result in
-                self?.completion?(result)
+                switch result {
+                case .success(let photos):
+                    let adjusted = photos.map { photo in
+                        if photo.coordinate == nil, let fallback {
+                            return PhotoData(imageData: photo.imageData, coordinate: fallback)
+                        }
+                        return photo
+                    }
+                    self?.completion?(.success(adjusted))
+                case .failure:
+                    self?.completion?(result)
+                }
+                self?.fallbackCoordinate = nil
                 self?.completion = nil
             }
         }

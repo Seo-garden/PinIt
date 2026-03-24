@@ -12,7 +12,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
     private let diContainer = AppDIContainer()
-
     
     func scene(
         _ scene: UIScene,
@@ -21,11 +20,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
 
-        let rootViewController = diContainer.makeLoginViewController()
-        let navigationController = UINavigationController(rootViewController: rootViewController)
-
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = navigationController
+        window.rootViewController = diContainer.makeMainTabBarController()
         window.makeKeyAndVisible()
 
         self.window = window

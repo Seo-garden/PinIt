@@ -74,12 +74,4 @@ public final class CreateRecordCoordinator {
         alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in completion?() })
         controller.present(alert, animated: true)
     }
-
-    func dismiss(from controller: UIViewController) {
-        if let nav = controller.navigationController, nav.viewControllers.first != controller {
-            nav.popViewController(animated: true)
-        } else {
-            controller.dismiss(animated: true)
-        }
-    }
 }
