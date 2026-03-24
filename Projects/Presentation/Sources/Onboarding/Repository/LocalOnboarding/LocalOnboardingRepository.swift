@@ -23,7 +23,7 @@ actor LocalOnboardingRepository: LocalOnboaringInterface {
 
     // MARK: state
     private(set) var hasCompletedOnboarding: Bool? = nil
-    func setHasCompletedOnboarding(_ value: Bool) {
+    func setHasCompletedOnboarding(_ value: Bool) async {
         hasCompletedOnboarding = value
     }
 

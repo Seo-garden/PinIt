@@ -10,5 +10,13 @@ import Foundation
 
 // MARK: fake
 internal actor LocalOnboardingFake: LocalOnboaringInterface {
-    
+    private(set) var hasCompletedOnboarding: Bool? = nil
+
+    func setHasCompletedOnboarding(_ value: Bool) async {
+        hasCompletedOnboarding = value
+    }
+
+    func loadStatus() async { }
+
+    func saveStatus() async { }
 }

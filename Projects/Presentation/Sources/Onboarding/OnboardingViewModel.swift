@@ -100,8 +100,9 @@ public final class OnboardingViewModel {
         self.isLastPage = isNextPageLast
     }
     public func finishOnboarding() async {
-        // mutate
-        logger.error("온보딩 완료 처리 구현 예정입니다.")
+        await localOnboardingRepo.setHasCompletedOnboarding(true)
+        await localOnboardingRepo.saveStatus()
+        isFinished = true
     }
     
     

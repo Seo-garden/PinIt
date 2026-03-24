@@ -26,6 +26,21 @@ final class AppDIContainer {
     private lazy var photoPickerAdapter: PhotoPickerAdaptable = PhotoPickerAdapter(photoRepository: photoRepository, fetchUserLocationUseCase: fetchUserLocationUseCase)
     
     // MARK: - Factory
+    func makeOnboardingViewController(onFinished: @escaping () -> Void) -> OnboardingViewController {
+        OnboardingViewController(
+            viewModel: OnboardingViewModel(),
+            onFinished: onFinished
+        )
+    }
+
+    func makeLoginViewController(onLoginSucceeded: @escaping () -> Void) -> UINavigationController {
+        let viewController = LoginViewController(
+            viewModel: LoginViewModel(),
+            onLoginSucceeded: onLoginSucceeded
+        )
+        return UINavigationController(rootViewController: viewController)
+    }
+
     func makeMainTabBarController() -> TabBarViewController {
         return TabBarViewController(
             mapViewController: makeMapViewController(),

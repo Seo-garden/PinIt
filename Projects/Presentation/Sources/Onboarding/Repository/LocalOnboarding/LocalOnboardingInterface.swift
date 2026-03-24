@@ -9,6 +9,10 @@ import Foundation
 
 
 // MARK: interface
-public protocol LocalOnboaringInterface: Sendable {
-    
+protocol LocalOnboaringInterface: Sendable {
+    var hasCompletedOnboarding: Bool? { get async }
+
+    func setHasCompletedOnboarding(_ value: Bool) async
+    func loadStatus() async
+    func saveStatus() async
 }

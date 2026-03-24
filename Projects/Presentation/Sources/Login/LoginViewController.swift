@@ -13,6 +13,7 @@ import RxSwift
 // MARK: viewcontroller
 @MainActor
 public final class LoginViewController: BaseViewController<LoginViewModel> {
+    private let onLoginSucceeded: (() -> Void)?
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private let heroStackView = UIStackView()
@@ -25,7 +26,11 @@ public final class LoginViewController: BaseViewController<LoginViewModel> {
     private let passwordTextField = UITextField()
     private let loginButton = UIButton(type: .system)
 
-    public override init(viewModel: LoginViewModel) {
+    public init(
+        viewModel: LoginViewModel,
+        onLoginSucceeded: (() -> Void)? = nil
+    ) {
+        self.onLoginSucceeded = onLoginSucceeded
         super.init(viewModel: viewModel)
     }
 
@@ -218,7 +223,14 @@ public final class LoginViewController: BaseViewController<LoginViewModel> {
 
         output.loginSucceeded
             .emit(onNext: { [weak self] message in
-                self?.presentAlert(title: "로그인", message: message)
+                guard let self else { return }
+
+                if let onLoginSucceeded {
+                    onLoginSucceeded()
+                    return
+                }
+
+                self.presentAlert(title: "로그인", message: message)
             })
             .disposed(by: disposeBag)
     }
