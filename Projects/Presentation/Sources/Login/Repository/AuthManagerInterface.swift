@@ -25,7 +25,7 @@ public enum AuthManagerRepositoryError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .firebaseNotConfigured:
-            return "Firebase 설정이 완료되지 않았습니다. App 타깃에 GoogleService-Info.plist를 추가해주세요."
+            return "Firebase 설정이 완료되지 않았습니다. Presentation 타깃 리소스에 GoogleService-Info.plist를 추가해주세요."
         case .missingUserEmail:
             return "로그인한 사용자 정보를 확인할 수 없습니다."
         case .wrongCredentials:

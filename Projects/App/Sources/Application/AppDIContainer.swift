@@ -24,7 +24,7 @@ final class AppDIContainer {
     
     // MARK: - Factory
     func makeLoginViewController() -> LoginViewController {
-        let viewModel = LoginViewModel(authManagerRepository: AuthManagerRepository())
+        let viewModel = LoginViewModel()
         return LoginViewController(viewModel: viewModel)
     }
 

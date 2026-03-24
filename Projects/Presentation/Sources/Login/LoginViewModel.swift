@@ -18,7 +18,8 @@ public final class LoginViewModel: MWBaseViewModel, MWViewModelType {
     private let authManagerRepository: any AuthManagerInterface
     private let logger = Logger()
 
-    public init(authManagerRepository: any AuthManagerInterface) {
+    public init(authManagerRepository: any AuthManagerInterface = AuthManagerRepository()) {
+        PresentationFirebaseBootstrap.configureIfNeeded()
         self.authManagerRepository = authManagerRepository
         super.init()
     }

@@ -1,6 +1,6 @@
 //
 //  AuthManagerRepository.swift
-//  App
+//  Presentation
 //
 //  Created by 김민우 on 3/24/26.
 //
@@ -8,7 +8,6 @@
 import Foundation
 import FirebaseAuth
 import FirebaseCore
-import Presentation
 import RxSwift
 
 public final class AuthManagerRepository: AuthManagerInterface {
@@ -16,7 +15,7 @@ public final class AuthManagerRepository: AuthManagerInterface {
 
     public func signIn(email: String, password: String) -> Single<String> {
         Single.create { single in
-            guard FirebaseApp.app() != nil else {
+            guard PresentationFirebaseBootstrap.configureIfNeeded() else {
                 single(.failure(AuthManagerRepositoryError.firebaseNotConfigured))
                 return Disposables.create()
             }
