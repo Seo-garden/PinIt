@@ -34,6 +34,8 @@ let project = Project.makeModule(
         .project(target: "Domain", path: "../Domain"),
         .project(target: "Data", path: "../Data"),
         .project(target: "Presentation", path: "../Presentation"),
-        .external(name: "FirebaseCore")
+        .external(name: "FirebaseCore"),
+        .external(name: "FirebaseAuth"),
+        .external(name: "RxSwift")
     ]
 )

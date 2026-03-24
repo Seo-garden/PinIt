@@ -279,5 +279,11 @@ public final class LoginViewController: MWBaseViewController<LoginViewModel> {
 
 
 #Preview {
-    LoginViewController(viewModel: LoginViewModel())
+    LoginViewController(viewModel: LoginViewModel(authManagerRepository: PreviewAuthManagerRepository()))
+}
+
+private struct PreviewAuthManagerRepository: AuthManagerInterface {
+    func signIn(email: String, password: String) -> Single<String> {
+        .just(email)
+    }
 }

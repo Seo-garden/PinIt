@@ -1,32 +1,15 @@
 //
 //  AuthManagerRepository.swift
-//  Presentation
+//  App
 //
-//  Created by 김민우 on 3/20/26.
+//  Created by 김민우 on 3/24/26.
 //
 
 import Foundation
 import FirebaseAuth
 import FirebaseCore
+import Presentation
 import RxSwift
-
-public protocol AuthManagerInterface {
-    func signIn(email: String, password: String) -> Single<String>
-}
-
-public enum AuthManagerRepositoryError: LocalizedError {
-    case firebaseNotConfigured
-    case missingUserEmail
-
-    public var errorDescription: String? {
-        switch self {
-        case .firebaseNotConfigured:
-            return "Firebase 설정이 완료되지 않았습니다. App 타깃에 GoogleService-Info.plist를 추가해주세요."
-        case .missingUserEmail:
-            return "로그인한 사용자 정보를 확인할 수 없습니다."
-        }
-    }
-}
 
 public final class AuthManagerRepository: AuthManagerInterface {
     public init() { }
@@ -40,7 +23,7 @@ public final class AuthManagerRepository: AuthManagerInterface {
 
             Auth.auth().signIn(withEmail: email, password: password) { result, error in
                 if let error {
-                    single(.failure(error))
+                    single(.failure(Self.map(error)))
                     return
                 }
 
@@ -53,6 +36,27 @@ public final class AuthManagerRepository: AuthManagerInterface {
             }
 
             return Disposables.create()
+        }
+    }
+
+    private static func map(_ error: Error) -> AuthManagerRepositoryError {
+        guard let errorCode = AuthErrorCode(rawValue: (error as NSError).code) else {
+            return .unknown
+        }
+
+        switch errorCode {
+        case .wrongPassword, .invalidCredential:
+            return .wrongCredentials
+        case .invalidEmail:
+            return .invalidEmail
+        case .userNotFound:
+            return .userNotFound
+        case .networkError:
+            return .network
+        case .tooManyRequests:
+            return .tooManyRequests
+        default:
+            return .unknown
         }
     }
 }

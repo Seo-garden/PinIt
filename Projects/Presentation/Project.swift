@@ -8,8 +8,6 @@ let project = Project.makeModule(
     dependencies: [
         .project(target: "Domain", path: "../Domain"),
         .external(name: "Expose"),
-        .external(name: "FirebaseAuth"),
-        .external(name: "FirebaseCore"),
         .external(name: "RxSwift"),
         .external(name: "RxCocoa"),
         .external(name: "RxRelay")

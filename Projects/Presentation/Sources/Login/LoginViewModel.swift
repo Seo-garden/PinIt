@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import FirebaseAuth
 import RxCocoa
 import RxRelay
 import RxSwift
@@ -19,7 +18,7 @@ public final class LoginViewModel: MWBaseViewModel, MWViewModelType {
     private let authManagerRepository: any AuthManagerInterface
     private let logger = Logger()
 
-    public init(authManagerRepository: any AuthManagerInterface = AuthManagerRepository()) {
+    public init(authManagerRepository: any AuthManagerInterface) {
         self.authManagerRepository = authManagerRepository
         super.init()
     }
@@ -111,24 +110,7 @@ public final class LoginViewModel: MWBaseViewModel, MWViewModelType {
             return authError.localizedDescription
         }
 
-        guard let errorCode = AuthErrorCode(rawValue: (error as NSError).code) else {
-            return "로그인에 실패했습니다. 잠시 후 다시 시도해주세요."
-        }
-
-        switch errorCode {
-        case .wrongPassword, .invalidCredential:
-            return "이메일 또는 비밀번호를 다시 확인해주세요."
-        case .invalidEmail:
-            return "올바른 이메일 형식을 입력해주세요."
-        case .userNotFound:
-            return "등록되지 않은 계정입니다."
-        case .networkError:
-            return "네트워크 연결을 확인해주세요."
-        case .tooManyRequests:
-            return "요청이 너무 많습니다. 잠시 후 다시 시도해주세요."
-        default:
-            return "로그인에 실패했습니다. 잠시 후 다시 시도해주세요."
-        }
+        return "로그인에 실패했습니다. 잠시 후 다시 시도해주세요."
     }
 
     private static func isValidEmail(_ email: String) -> Bool {
