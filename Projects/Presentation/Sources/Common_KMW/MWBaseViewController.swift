@@ -1,3 +1,4 @@
+/*
 //
 //  MWBaseViewController.swift
 //  Presentation
@@ -33,3 +34,4 @@ public class MWBaseViewController<VM: MWViewModelType>: UIViewController {
     func setupLayout() { }
     func bindViewModel() { }
 }
+*/

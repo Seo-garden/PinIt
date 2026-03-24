@@ -14,14 +14,14 @@ import OSLog
 
 // MARK: object
 @MainActor
-public final class LoginViewModel: MWBaseViewModel, MWViewModelType {
+public final class LoginViewModel: ViewModelType {
     private let authManagerRepository: any AuthManagerInterface
     private let logger = Logger()
+    private let disposeBag = DisposeBag()
 
     public init(authManagerRepository: any AuthManagerInterface = AuthManagerRepository()) {
         PresentationFirebaseBootstrap.configureIfNeeded()
         self.authManagerRepository = authManagerRepository
-        super.init()
     }
 
     public struct Input {

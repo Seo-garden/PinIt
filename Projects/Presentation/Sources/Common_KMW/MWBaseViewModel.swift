@@ -1,3 +1,4 @@
+/*
 //
 //  MWBaseViewModel.swift
 //  Presentation
@@ -14,3 +15,4 @@ public class MWBaseViewModel {
         disposeBag = DisposeBag()
     }
 }
+*/

@@ -1,3 +1,4 @@
+/*
 //
 //  MWViewModelType.swift
 //  Presentation
@@ -12,3 +13,4 @@ public protocol MWViewModelType {
     
     func transform(input: Input) -> Output
 }
+*/

@@ -12,7 +12,7 @@ import RxSwift
 
 // MARK: viewcontroller
 @MainActor
-public final class LoginViewController: MWBaseViewController<LoginViewModel> {
+public final class LoginViewController: BaseViewController<LoginViewModel> {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private let heroStackView = UIStackView()
@@ -34,7 +34,7 @@ public final class LoginViewController: MWBaseViewController<LoginViewModel> {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func setupUI() {
+    public override func setupUI() {
         view.backgroundColor = UIColor(red: 245 / 255, green: 246 / 255, blue: 250 / 255, alpha: 1)
         title = "로그인"
         navigationItem.largeTitleDisplayMode = .never
@@ -109,7 +109,7 @@ public final class LoginViewController: MWBaseViewController<LoginViewModel> {
         contentView.addSubview(formCardView)
     }
 
-    override func setupLayout() {
+    public override func setupLayout() {
         [
             scrollView,
             contentView,
@@ -163,7 +163,7 @@ public final class LoginViewController: MWBaseViewController<LoginViewModel> {
         ])
     }
 
-    override func bindViewModel() {
+    public override func bind() {
         let tapGesture = UITapGestureRecognizer()
         view.addGestureRecognizer(tapGesture)
 
