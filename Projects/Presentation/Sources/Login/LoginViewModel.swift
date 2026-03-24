@@ -140,6 +140,6 @@ public final class LoginViewModel: MWBaseViewModel, MWViewModelType {
     }
 
     private static func isValidPassword(_ password: String) -> Bool {
-        password.count >= 8
+        password.count >= 6
     }
 }
