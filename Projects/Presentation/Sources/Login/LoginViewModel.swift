@@ -16,10 +16,10 @@ import OSLog
 // MARK: object
 @MainActor
 public final class LoginViewModel: MWBaseViewModel, MWViewModelType {
-    private let authManagerRepository: any AuthManagerRepositoryType
+    private let authManagerRepository: any AuthManagerInterface
     private let logger = Logger()
 
-    public init(authManagerRepository: any AuthManagerRepositoryType = AuthManagerRepository()) {
+    public init(authManagerRepository: any AuthManagerInterface = AuthManagerRepository()) {
         self.authManagerRepository = authManagerRepository
         super.init()
     }

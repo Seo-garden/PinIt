@@ -10,7 +10,7 @@ import FirebaseAuth
 import FirebaseCore
 import RxSwift
 
-public protocol AuthManagerRepositoryType {
+public protocol AuthManagerInterface {
     func signIn(email: String, password: String) -> Single<String>
 }
 
@@ -28,7 +28,7 @@ public enum AuthManagerRepositoryError: LocalizedError {
     }
 }
 
-public final class AuthManagerRepository: AuthManagerRepositoryType {
+public final class AuthManagerRepository: AuthManagerInterface {
     public init() { }
 
     public func signIn(email: String, password: String) -> Single<String> {
