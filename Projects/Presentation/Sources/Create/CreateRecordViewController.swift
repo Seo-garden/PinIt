@@ -94,6 +94,13 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
             .subscribe(onNext: { [weak self] in self?.dismiss(animated: true) })
             .disposed(by: disposeBag)
 
+        recordView.locationField.tap
+            .emit(onNext: { [weak self] in
+                guard let self else { return }
+                self.coordinator.pushLocationSearch(from: self)
+            })
+            .disposed(by: disposeBag)
+
         let output = viewModel.transform(input: input)
 
         output.state

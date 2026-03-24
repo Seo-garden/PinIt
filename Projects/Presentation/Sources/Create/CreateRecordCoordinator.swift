@@ -69,6 +69,12 @@ public final class CreateRecordCoordinator {
         }
     }
     
+    func pushLocationSearch(from controller: UIViewController) {
+        let viewModel = LocationSearchViewModel()
+        let searchVC = LocationSearchViewController(viewModel: viewModel)
+        controller.navigationController?.pushViewController(searchVC, animated: true)
+    }
+
     func showAlert(from controller: UIViewController, title: String, message: String, completion: (() -> Void)? = nil) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in completion?() })
