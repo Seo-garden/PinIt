@@ -22,7 +22,7 @@ final class AppDIContainer {
     private lazy var fetchUserLocationUseCase: FetchUserLocationUseCase = DefaultFetchUserLocationUseCase(repository: locationRepository)
 
     // MARK: - Adapter
-    private lazy var photoPickerAdapter: PhotoPickerAdaptable = PhotoPickerAdapter(photoRepository: photoRepository)
+    private lazy var photoPickerAdapter: PhotoPickerAdaptable = PhotoPickerAdapter(photoRepository: photoRepository, fetchUserLocationUseCase: fetchUserLocationUseCase)
     
     // MARK: - Factory
     func makeMainTabBarController() -> TabBarViewController {
