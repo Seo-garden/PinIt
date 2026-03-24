@@ -12,19 +12,15 @@ import RxRelay
 import RxSwift
 import UIKit
 
-public protocol MemoryComposeDelegate: AnyObject {
-    func memoryCompose(_ viewController: CreateRecordViewController, didFinish draft: MemoryDraft)
-    func memoryComposeDidCancel(_ viewController: CreateRecordViewController)
-}
-
 public final class CreateRecordViewController: BaseViewController<CreateRecordViewModel> {
     private let coordinator: CreateRecordCoordinator
-    public weak var delegate: MemoryComposeDelegate?
     private let addPhotosRelay = PublishRelay<[PhotoData]>()
     private let currentPageRelay = PublishRelay<Int>()
     private let selectSuggestedLocationRelay = PublishRelay<Int>()
     private let recordView = RecordView(showsPhotoActions: true)
     private var currentPhotos: [PhotoData] = []
+    
+    private let closeButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil)
 
     public init(viewModel: CreateRecordViewModel, coordinator: CreateRecordCoordinator) {
         self.coordinator = coordinator
@@ -34,7 +30,7 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
     // MARK: - Lifecycle
     public override func viewDidLoad() {
         super.viewDidLoad()
-        title = CreateRecordStrings.newMemoryTitle
+        title = AppStrings.Record.newMemoryTitle
     }
 
     public override func viewDidLayoutSubviews() {
@@ -68,6 +64,8 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
         recordView.suggestionButtons.forEach {
             $0.addTarget(self, action: #selector(didTapSuggestionChip(_:)), for: .touchUpInside)
         }
+        
+        navigationItem.leftBarButtonItem = closeButton
     }
 
     public override func setupLayout() {
@@ -91,6 +89,10 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
             selectSuggestedLocation: selectSuggestedLocationRelay.asSignal(onErrorSignalWith: .empty()),
             recordTap: recordView.recordButton.rx.tap.asSignal()
         )
+        
+        closeButton.rx.tap
+            .subscribe(onNext: { [weak self] in self?.dismiss(animated: true) })
+            .disposed(by: disposeBag)
 
         let output = viewModel.transform(input: input)
 
@@ -129,12 +131,8 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
             .disposed(by: disposeBag)
 
         output.finish
-            .emit(onNext: { [weak self] draft in
-                guard let self else { return }
-                self.coordinator.showAlert(from: self, title: CreateRecordStrings.saveSuccessTitle, message: CreateRecordStrings.saveSuccessMessage) {
-                    self.delegate?.memoryCompose(self, didFinish: draft)
-                    self.coordinator.dismiss(from: self)
-                }
+            .emit(onNext: { [weak self] _ in
+                self?.dismiss(animated: true)
             })
             .disposed(by: disposeBag)
 
@@ -224,11 +222,6 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
         }
     }
 
-    @objc private func didTapCancel() {
-        coordinator.dismiss(from: self)
-        delegate?.memoryComposeDidCancel(self)
-    }
-
     @objc private func didTapSuggestionChip(_ sender: UIButton) {
         selectSuggestedLocationRelay.accept(sender.tag)
     }
@@ -255,26 +248,26 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
         case .failure(let error):
             switch error {
             case .unavailable:
-                coordinator.showAlert(from: self, title: CreateRecordStrings.cameraUnavailableMessage, message: "")
+                coordinator.showAlert(from: self, title: AppStrings.Record.cameraUnavailableMessage, message: "")
             case .accessDenied:
-                coordinator.showAlert(from: self, title: CreateRecordStrings.cameraDeniedMessage, message: error.localizedDescription)
+                coordinator.showAlert(from: self, title: AppStrings.Record.cameraDeniedMessage, message: error.localizedDescription)
             case .loadFailed:
-                coordinator.showAlert(from: self, title: CreateRecordStrings.photoErrorMessage, message: error.localizedDescription)
+                coordinator.showAlert(from: self, title: AppStrings.Record.photoErrorMessage, message: error.localizedDescription)
             }
         }
     }
 
     private func handlePermissionDenied(_ source: PermissionSource) {
         let isCamera = source == .camera
-        let title = isCamera ? CreateRecordStrings.cameraDeniedTitle : CreateRecordStrings.galleryDeniedTitle
-        let message = isCamera ? CreateRecordStrings.cameraDeniedMessage : CreateRecordStrings.galleryDeniedMessage
+        let title = isCamera ? AppStrings.Record.cameraDeniedTitle : AppStrings.Record.galleryDeniedTitle
+        let message = isCamera ? AppStrings.Record.cameraDeniedMessage : AppStrings.Record.galleryDeniedMessage
         showSettingsAlert(title: title, message: message)
     }
 
     private func showSettingsAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: CreateRecordStrings.cancel, style: .cancel))
-        alert.addAction(UIAlertAction(title: CreateRecordStrings.openSettings, style: .default) { _ in
+        alert.addAction(UIAlertAction(title: AppStrings.Common.cancel, style: .cancel))
+        alert.addAction(UIAlertAction(title: AppStrings.Common.openSettings, style: .default) { _ in
             if let url = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(url) {
                 UIApplication.shared.open(url)
             }
