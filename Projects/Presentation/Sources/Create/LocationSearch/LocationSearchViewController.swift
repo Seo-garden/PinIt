@@ -15,7 +15,10 @@ public final class LocationSearchViewController: BaseViewController<LocationSear
     private let searchView = LocationSearchView()
     private let searchTextRelay = PublishRelay<String>()
     private let selectItemRelay = PublishRelay<Int>()
+    private let selectTapRelay = PublishRelay<Void>()
     private var currentResults: [LocationSearchItem] = []
+    private var selectedItem: LocationSearchItem?
+    var onLocationSelected: ((LocationSearchItem) -> Void)?
 
     public override init(viewModel: LocationSearchViewModel) {
         super.init(viewModel: viewModel)
@@ -24,7 +27,7 @@ public final class LocationSearchViewController: BaseViewController<LocationSear
     // MARK: - Lifecycle
     public override func viewDidLoad() {
         super.viewDidLoad()
-        title = "장소 검색"
+        title = AppStrings.Search.title
     }
 
     // MARK: - Setup
@@ -40,7 +43,7 @@ public final class LocationSearchViewController: BaseViewController<LocationSear
             forCellReuseIdentifier: LocationSearchResultCell.reuseIdentifier
         )
 
-        searchView.searchTextField.addTarget(self, action: #selector(searchTextDidChange(_:)), for: .editingChanged)
+        searchView.searchBar.delegate = self
         searchView.selectButton.addTarget(self, action: #selector(didTapSelect), for: .touchUpInside)
     }
 
@@ -60,7 +63,7 @@ public final class LocationSearchViewController: BaseViewController<LocationSear
             .asSignal(onErrorJustReturn: "")
 
         let selectItem = selectItemRelay.asSignal(onErrorSignalWith: .empty())
-        let selectTap = Signal<Void>.empty()
+        let selectTap = selectTapRelay.asSignal(onErrorSignalWith: .empty())
 
         let input = LocationSearchViewModel.Input(
             searchText: searchText,
@@ -85,6 +88,8 @@ public final class LocationSearchViewController: BaseViewController<LocationSear
                 self.searchView.selectButton.isEnabled = hasSelection
                 self.searchView.selectButton.alpha = hasSelection ? 1.0 : 0.5
 
+                self.selectedItem = item
+                self.searchView.searchBar.text = item?.name
                 self.searchView.mapView.removeAnnotations(self.searchView.mapView.annotations)
                 if let item {
                     let coordinate = CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude)
@@ -102,18 +107,36 @@ public final class LocationSearchViewController: BaseViewController<LocationSear
             })
             .disposed(by: disposeBag)
 
+        output.errorMessage
+            .emit(onNext: { [weak self] message in
+                let alert = UIAlertController(title: AppStrings.Search.errorTitle, message: message, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: AppStrings.Common.confirm, style: .default))
+                self?.present(alert, animated: true)
+            })
+            .disposed(by: disposeBag)
+
         output.dismiss
             .emit(onNext: { [weak self] in self?.navigationController?.popViewController(animated: true) })
             .disposed(by: disposeBag)
     }
 
     // MARK: - Actions
-    @objc private func searchTextDidChange(_ textField: UITextField) {
-        searchTextRelay.accept(textField.text ?? "")
+    @objc private func didTapSelect() {
+        if let selectedItem {
+            onLocationSelected?(selectedItem)
+        }
+        selectTapRelay.accept(())
+    }
+}
+
+// MARK: - UISearchBarDelegate
+extension LocationSearchViewController: UISearchBarDelegate {
+    public func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        searchTextRelay.accept(searchText)
     }
 
-    @objc private func didTapSelect() {
-        navigationController?.popViewController(animated: true)
+    public func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
     }
 }
 

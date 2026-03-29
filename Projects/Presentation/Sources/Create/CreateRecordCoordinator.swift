@@ -11,11 +11,12 @@ import Photos
 import UIKit
 
 public final class CreateRecordCoordinator {
-    weak var hostViewController: UIViewController?
     private let photoAdapter: PhotoPickerAdaptable
+    private let searchLocationUseCase: SearchLocationUseCase
 
-    public init(photoAdapter: PhotoPickerAdaptable) {
+    public init(photoAdapter: PhotoPickerAdaptable, searchLocationUseCase: SearchLocationUseCase) {
         self.photoAdapter = photoAdapter
+        self.searchLocationUseCase = searchLocationUseCase
     }
 
     func presentCamera(
@@ -68,9 +69,10 @@ public final class CreateRecordCoordinator {
         }
     }
     
-    func pushLocationSearch(from controller: UIViewController) {
-        let viewModel = LocationSearchViewModel()
+    func pushLocationSearch(from controller: UIViewController, onLocationSelected: @escaping (LocationSearchItem) -> Void) {
+        let viewModel = LocationSearchViewModel(searchLocationUseCase: searchLocationUseCase)
         let searchVC = LocationSearchViewController(viewModel: viewModel)
+        searchVC.onLocationSelected = onLocationSelected
         controller.navigationController?.pushViewController(searchVC, animated: true)
     }
 

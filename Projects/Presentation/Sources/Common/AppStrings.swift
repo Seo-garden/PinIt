@@ -10,6 +10,7 @@ import Foundation
 enum AppStrings {
     enum Common {
         static let cancel = NSLocalizedString("common.cancel", value: "취소", comment: "")
+        static let confirm = NSLocalizedString("common.confirm", value: "확인", comment: "")
         static let openSettings = NSLocalizedString("common.openSettings", value: "설정으로 이동", comment: "")
     }
 
@@ -21,6 +22,11 @@ enum AppStrings {
         static let galleryDeniedMessage = NSLocalizedString("record.alert.galleryDenied.message", value: "해당 기능을 사용하려면 사진 보관함에서 접근을 허용해주세요.", comment: "")
         static let cameraUnavailableMessage = NSLocalizedString("record.alert.cameraUnavailable", value: "이 기기에서는 카메라를 사용할 수 없습니다.", comment: "")
         static let photoErrorMessage = NSLocalizedString("record.alert.photoError", value: "사진 에러", comment: "")
+    }
+
+    enum Search {
+        static let title = NSLocalizedString("search.title", value: "장소 검색", comment: "")
+        static let errorTitle = NSLocalizedString("search.alert.error.title", value: "검색 오류", comment: "")
     }
 
     enum Map {

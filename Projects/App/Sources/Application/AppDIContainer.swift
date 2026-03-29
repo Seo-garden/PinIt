@@ -20,6 +20,8 @@ final class AppDIContainer {
     private lazy var reverseGeocodeUseCase: ReverseGeocodeUseCase = DefaultReverseGeocodeUseCase(repository: geocodingRepository)
     private lazy var locationSuggestionUseCase: LocationSuggestionUseCase = DefaultLocationSuggestionUseCase(reverseGeocodeUseCase: reverseGeocodeUseCase)
     private lazy var fetchUserLocationUseCase: FetchUserLocationUseCase = DefaultFetchUserLocationUseCase(repository: locationRepository)
+    private lazy var locationSearchRepository: LocationSearchRepository = DefaultLocationSearchRepository()
+    private lazy var searchLocationUseCase: SearchLocationUseCase = DefaultSearchLocationUseCase(repository: locationSearchRepository)
 
     // MARK: - Adapter
     private lazy var photoPickerAdapter: PhotoPickerAdaptable = PhotoPickerAdapter(photoRepository: photoRepository, fetchUserLocationUseCase: fetchUserLocationUseCase)
@@ -43,7 +45,7 @@ final class AppDIContainer {
 
     private func makeCreateRecordViewController() -> CreateRecordViewController {
         let viewModel = CreateRecordViewModel(locationSuggestionUseCase: locationSuggestionUseCase)
-        let coordinator = CreateRecordCoordinator(photoAdapter: photoPickerAdapter)
+        let coordinator = CreateRecordCoordinator(photoAdapter: photoPickerAdapter, searchLocationUseCase: searchLocationUseCase)
         return CreateRecordViewController(
             viewModel: viewModel,
             coordinator: coordinator

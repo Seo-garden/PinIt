@@ -32,17 +32,20 @@ public final class CreateRecordViewModel: ViewModelType {
         public var locationName: String?
         public var coordinate: Coordinate?
         public var suggestions: [SuggestedLocation] = []
+        public var isManuallySet: Bool = false
 
         public mutating func reset() {
             suggestions = []
             locationName = nil
             coordinate = nil
+            isManuallySet = false
         }
 
         public static func == (lhs: LocationState, rhs: LocationState) -> Bool {
             lhs.locationName == rhs.locationName
                 && lhs.coordinate == rhs.coordinate
                 && lhs.suggestions == rhs.suggestions
+                && lhs.isManuallySet == rhs.isManuallySet
         }
     }
 
@@ -79,6 +82,7 @@ public final class CreateRecordViewModel: ViewModelType {
         case setCaption(String)
         case setPage(Int)
         case setLocation(Coordinate?, String?)
+        case setSearchedLocation(Coordinate, String)
         case setSuggestions([SuggestedLocation])
         case applySuggestion(Int)
     }
@@ -102,14 +106,23 @@ public final class CreateRecordViewModel: ViewModelType {
         case .setLocation(let coord, let name):
             newState.location.coordinate = coord
             newState.location.locationName = name
+            if coord == nil && name == nil {
+                newState.location.isManuallySet = false
+            }
+        case .setSearchedLocation(let coord, let name):
+            newState.location.coordinate = coord
+            newState.location.locationName = name
+            newState.location.isManuallySet = true
         case .setSuggestions(let suggestions):
             newState.location.suggestions = suggestions
-            if suggestions.isEmpty {
-                newState.location.coordinate = nil
-                newState.location.locationName = nil
-            } else if newState.location.locationName == nil {
-                newState.location.coordinate = suggestions[0].coordinate
-                newState.location.locationName = suggestions[0].title
+            if !newState.location.isManuallySet {
+                if suggestions.isEmpty {
+                    newState.location.coordinate = nil
+                    newState.location.locationName = nil
+                } else if newState.location.locationName == nil {
+                    newState.location.coordinate = suggestions[0].coordinate
+                    newState.location.locationName = suggestions[0].title
+                }
             }
         case .applySuggestion(let index):
             if index < newState.location.suggestions.count {
@@ -119,7 +132,7 @@ public final class CreateRecordViewModel: ViewModelType {
             }
         }
 
-        if newState.photo.photos.isEmpty {
+        if newState.photo.photos.isEmpty && !newState.location.isManuallySet {
             newState.location.reset()
         }
 
@@ -135,6 +148,7 @@ public final class CreateRecordViewModel: ViewModelType {
         public let currentPageChanged: Signal<Int>
         public let clearLocationTap: Signal<Void>
         public let selectSuggestedLocation: Signal<Int>
+        public let searchedLocation: Signal<(name: String, coordinate: Coordinate)>
         public let recordTap: Signal<Void>
     }
 
@@ -194,6 +208,9 @@ public final class CreateRecordViewModel: ViewModelType {
         let applySuggestionMutation = input.selectSuggestedLocation.asObservable()
             .map { Mutation.applySuggestion($0) }
 
+        let searchedLocationMutation = input.searchedLocation.asObservable()
+            .map { Mutation.setSearchedLocation($0.coordinate, $0.name) }
+
         let suggestionsMutation = Observable.merge(setPhotosMutation, deletePhotoMutation)
             .withLatestFrom(state) { _, current in current.photo.photos }
             .flatMapLatest { [weak self] photos -> Observable<[SuggestedLocation]> in
@@ -215,6 +232,7 @@ public final class CreateRecordViewModel: ViewModelType {
             setPageMutation,
             clearLocationMutation,
             applySuggestionMutation,
+            searchedLocationMutation,
             suggestionsMutation
         ])
         .subscribe(onNext: { mutation in

@@ -9,24 +9,11 @@ import MapKit
 import UIKit
 
 final class LocationSearchView: UIView {
-    let searchTextField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "장소를 검색해보세요"
-        textField.borderStyle = .none
-        textField.backgroundColor = .secondarySystemBackground
-        textField.layer.cornerRadius = 12
-        textField.font = .systemFont(ofSize: 16)
-        textField.clearButtonMode = .whileEditing
-        textField.returnKeyType = .search
-        let iconView = UIImageView(image: UIImage(systemName: "magnifyingglass"))
-        iconView.tintColor = .secondaryLabel
-        iconView.contentMode = .scaleAspectFit
-        iconView.frame = CGRect(x: 8, y: 0, width: 20, height: 20)
-        let paddingContainer = UIView(frame: CGRect(x: 0, y: 0, width: 36, height: 20))
-        paddingContainer.addSubview(iconView)
-        textField.leftView = paddingContainer
-        textField.leftViewMode = .always
-        return textField
+    let searchBar: UISearchBar = {
+        let searchBar = UISearchBar()
+        searchBar.placeholder = "장소를 검색해보세요"
+        searchBar.searchBarStyle = .minimal
+        return searchBar
     }()
 
     let tableView: UITableView = {
@@ -81,7 +68,7 @@ final class LocationSearchView: UIView {
 
     private func setupUI() {
         backgroundColor = .systemBackground
-        [searchTextField, tableView, divider, bottomContainer].forEach {
+        [searchBar, tableView, divider, bottomContainer].forEach {
             addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -93,12 +80,11 @@ final class LocationSearchView: UIView {
 
     private func setupLayout() {
         NSLayoutConstraint.activate([
-            searchTextField.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            searchTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            searchTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            searchTextField.heightAnchor.constraint(equalToConstant: 44),
+            searchBar.topAnchor.constraint(equalTo: topAnchor),
+            searchBar.leadingAnchor.constraint(equalTo: leadingAnchor),
+            searchBar.trailingAnchor.constraint(equalTo: trailingAnchor),
 
-            tableView.topAnchor.constraint(equalTo: searchTextField.bottomAnchor, constant: 8),
+            tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
 
