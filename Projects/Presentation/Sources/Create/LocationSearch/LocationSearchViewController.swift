@@ -161,6 +161,7 @@ extension LocationSearchViewController: UITableViewDataSource, UITableViewDelega
 
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        searchView.searchBar.resignFirstResponder()
         selectItemRelay.accept(indexPath.row)
     }
 }
