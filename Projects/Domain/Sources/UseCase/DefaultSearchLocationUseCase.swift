@@ -8,7 +8,6 @@
 import Foundation
 
 public protocol SearchLocationUseCase {
-    @discardableResult
     func execute(query: String, completion: @escaping (Result<[LocationSearchResult], LocationError>) -> Void) -> Cancellable
 }
 
