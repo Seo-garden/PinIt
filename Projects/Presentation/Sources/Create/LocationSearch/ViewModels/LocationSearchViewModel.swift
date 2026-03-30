@@ -68,7 +68,7 @@ public final class LocationSearchViewModel: ViewModelType {
 
     private func searchLocations(query: String) -> Observable<[LocationSearchItem]> {
         Observable.create { [weak self] observer in
-            self?.searchLocationUseCase.execute(query: query) { result in
+            let task = self?.searchLocationUseCase.execute(query: query) { result in
                 switch result {
                 case .success(let locations):
                     let items = locations.map {
@@ -87,7 +87,9 @@ public final class LocationSearchViewModel: ViewModelType {
                     observer.onCompleted()
                 }
             }
-            return Disposables.create()
+            return Disposables.create {
+                task?.cancel()
+            }
         }
     }
 }

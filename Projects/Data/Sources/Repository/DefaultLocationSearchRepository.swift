@@ -12,7 +12,8 @@ import MapKit
 public struct DefaultLocationSearchRepository: LocationSearchRepository {
     public init() {}
 
-    public func search(query: String, completion: @escaping (Result<[LocationSearchResult], LocationError>) -> Void) {
+    @discardableResult
+    public func search(query: String, completion: @escaping (Result<[LocationSearchResult], LocationError>) -> Void) -> Cancellable {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = query
 
@@ -50,5 +51,19 @@ public struct DefaultLocationSearchRepository: LocationSearchRepository {
 
             completion(.success(results))
         }
+
+        return MKLocalSearchCancellable(search: search)
+    }
+}
+
+private struct MKLocalSearchCancellable: Cancellable {
+    private let search: MKLocalSearch
+
+    init(search: MKLocalSearch) {
+        self.search = search
+    }
+
+    func cancel() {
+        search.cancel()
     }
 }

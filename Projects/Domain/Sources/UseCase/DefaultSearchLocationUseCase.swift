@@ -8,7 +8,8 @@
 import Foundation
 
 public protocol SearchLocationUseCase {
-    func execute(query: String, completion: @escaping (Result<[LocationSearchResult], LocationError>) -> Void)
+    @discardableResult
+    func execute(query: String, completion: @escaping (Result<[LocationSearchResult], LocationError>) -> Void) -> Cancellable
 }
 
 public struct DefaultSearchLocationUseCase: SearchLocationUseCase {
@@ -18,12 +19,13 @@ public struct DefaultSearchLocationUseCase: SearchLocationUseCase {
         self.repository = repository
     }
 
-    public func execute(query: String, completion: @escaping (Result<[LocationSearchResult], LocationError>) -> Void) {
+    @discardableResult
+    public func execute(query: String, completion: @escaping (Result<[LocationSearchResult], LocationError>) -> Void) -> Cancellable {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             completion(.success([]))
-            return
+            return EmptyCancellable()
         }
-        repository.search(query: trimmed, completion: completion)
+        return repository.search(query: trimmed, completion: completion)
     }
 }
