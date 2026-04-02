@@ -14,9 +14,15 @@ import RxSwift
 public final class CreateRecordViewModel: ViewModelType {
     public static let maxPhotos = 5
     private let locationSuggestionUseCase: LocationSuggestionUseCase
+    private let saveRecordUseCase: SaveRecordUseCase
     private var disposeBag = DisposeBag()
-    public init(locationSuggestionUseCase: LocationSuggestionUseCase) {
+
+    public init(
+        locationSuggestionUseCase: LocationSuggestionUseCase,
+        saveRecordUseCase: SaveRecordUseCase
+    ) {
         self.locationSuggestionUseCase = locationSuggestionUseCase
+        self.saveRecordUseCase = saveRecordUseCase
     }
 
     public struct PhotoState: Equatable {
@@ -65,7 +71,7 @@ public final class CreateRecordViewModel: ViewModelType {
         }
 
         public var captionCountText: String {
-            "\(form.caption.count) / \(MemoryCaptionValidator.maxLength)"
+            "\(form.caption.count) / \(RecordCaptionValidator.maxLength)"
         }
 
         public var isRecordEnabled: Bool {
@@ -157,7 +163,7 @@ public final class CreateRecordViewModel: ViewModelType {
         public let requestCamera: Signal<Void>
         public let requestGallery: Signal<Int>
         public let showAlert: Signal<AlertMessage>
-        public let finish: Signal<MemoryDraft>
+        public let finish: Signal<Record>
         public let photoDeleted: Signal<Int>
     }
 
@@ -196,7 +202,7 @@ public final class CreateRecordViewModel: ViewModelType {
             .share()
 
         let setCaptionMutation = input.captionChanged.asObservable()
-            .map { MemoryCaptionValidator.truncate($0) }
+            .map { RecordCaptionValidator.truncate($0) }
             .map { Mutation.setCaption($0) }
 
         let setPageMutation = input.currentPageChanged.asObservable()
@@ -242,19 +248,49 @@ public final class CreateRecordViewModel: ViewModelType {
 
         let drivenState = state.asDriver()
 
-        let finish = input.recordTap.asObservable()
+        let saveResult = input.recordTap.asObservable()
             .withLatestFrom(state)
             .filter { s in
-                let trimmed = MemoryCaptionValidator.trimmed(s.form.caption)
-                return !s.photo.photos.isEmpty && MemoryCaptionValidator.isValid(trimmed)
+                let trimmed = RecordCaptionValidator.trimmed(s.form.caption)
+                return !s.photo.photos.isEmpty && RecordCaptionValidator.isValid(trimmed)
             }
-            .map { s in
-                MemoryDraft(
+            .flatMapLatest { [weak self] s -> Observable<Event<Record>> in
+                guard let self else { return .empty() }
+                let draft = RecordDraft(
                     photoDataList: s.photo.photos,
-                    caption: MemoryCaptionValidator.trimmed(s.form.caption),
+                    caption: RecordCaptionValidator.trimmed(s.form.caption),
                     locationName: s.location.locationName,
                     coordinate: s.location.coordinate
                 )
+                return Observable.create { observer in
+                    self.saveRecordUseCase.execute(draft: draft) { result in
+                        switch result {
+                        case .success(let record):
+                            observer.onNext(.next(record))
+                            observer.onCompleted()
+                        case .failure(let error):
+                            observer.onNext(.error(error))
+                            observer.onCompleted()
+                        }
+                    }
+                    return Disposables.create()
+                }
+            }
+            .share()
+
+        let finish = saveResult
+            .compactMap { event -> Record? in
+                if case .next(let record) = event { return record }
+                return nil
+            }
+            .asSignal(onErrorSignalWith: .empty())
+
+        let saveError = saveResult
+            .compactMap { event -> AlertMessage? in
+                if case .error = event {
+                    return AlertMessage(title: "저장 실패", message: "기록 저장에 실패했습니다. 다시 시도해주세요.")
+                }
+                return nil
             }
             .asSignal(onErrorSignalWith: .empty())
 
@@ -270,7 +306,7 @@ public final class CreateRecordViewModel: ViewModelType {
             state: drivenState,
             requestCamera: requestCamera,
             requestGallery: requestGallery,
-            showAlert: overLimitAlert,
+            showAlert: Signal.merge(overLimitAlert, saveError),
             finish: finish,
             photoDeleted: photoDeleted
         )

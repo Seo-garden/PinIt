@@ -131,7 +131,7 @@ final class RecordView: UIView {
         return label
     }()
     
-    let captionInputView = CaptionInputView(maxLength: MemoryCaptionValidator.maxLength)
+    let captionInputView = CaptionInputView(maxLength: RecordCaptionValidator.maxLength)
 
     let locationTitleLabel: UILabel = {
         let label = UILabel()
@@ -271,12 +271,12 @@ final class RecordView: UIView {
             ] + chipButtons
 
         case .detail:
-            captionInputView.isUserInteractionEnabled = true
+            locationField.isUserInteractionEnabled = false
         }
 
         allViews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
 
-        captionCountLabel.text = "0 / \(MemoryCaptionValidator.maxLength)"
+        captionCountLabel.text = "0 / \(RecordCaptionValidator.maxLength)"
     }
 
     private func setupLayout() {

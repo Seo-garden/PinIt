@@ -15,6 +15,7 @@ final class AppDIContainer {
     private lazy var geocodingRepository: GeocodingRepository = DefaultGeocodingRepository()
     private lazy var photoRepository: PhotoRepository = DefaultPhotoRepository()
     private lazy var locationRepository: LocationRepository = DefaultLocationRepository()
+    private lazy var recordRepository: RecordRepository = InMemoryRecordRepository()
 
     // MARK: - UseCase
     private lazy var reverseGeocodeUseCase: ReverseGeocodeUseCase = DefaultReverseGeocodeUseCase(repository: geocodingRepository)
@@ -22,6 +23,10 @@ final class AppDIContainer {
     private lazy var fetchUserLocationUseCase: FetchUserLocationUseCase = DefaultFetchUserLocationUseCase(repository: locationRepository)
     private lazy var locationSearchRepository: LocationSearchRepository = DefaultLocationSearchRepository()
     private lazy var searchLocationUseCase: SearchLocationUseCase = DefaultSearchLocationUseCase(repository: locationSearchRepository)
+    private lazy var saveRecordUseCase: SaveRecordUseCase = DefaultSaveRecordUseCase(repository: recordRepository)
+    private lazy var fetchAllRecordsUseCase: FetchAllRecordsUseCase = DefaultFetchAllRecordsUseCase(repository: recordRepository)
+    private lazy var deleteRecordUseCase: DeleteRecordUseCase = DefaultDeleteRecordUseCase(repository: recordRepository)
+    private lazy var updateRecordCaptionUseCase: UpdateRecordCaptionUseCase = DefaultUpdateRecordCaptionUseCase(repository: recordRepository)
 
     // MARK: - Adapter
     private lazy var photoPickerAdapter: PhotoPickerAdaptable = PhotoPickerAdapter(photoRepository: photoRepository, fetchUserLocationUseCase: fetchUserLocationUseCase)
@@ -40,15 +45,32 @@ final class AppDIContainer {
     }
 
     private func makeFeedViewController() -> FeedViewController {
-        return FeedViewController(viewModel: FeedViewModel())
+        let viewModel = FeedViewModel(fetchAllRecordsUseCase: fetchAllRecordsUseCase)
+        let coordinator = FeedCoordinator { [unowned self] record in
+            self.makeDetailRecordViewController(record: record)
+        }
+        return FeedViewController(viewModel: viewModel, coordinator: coordinator)
     }
 
     private func makeCreateRecordViewController() -> CreateRecordViewController {
-        let viewModel = CreateRecordViewModel(locationSuggestionUseCase: locationSuggestionUseCase)
+        let viewModel = CreateRecordViewModel(
+            locationSuggestionUseCase: locationSuggestionUseCase,
+            saveRecordUseCase: saveRecordUseCase
+        )
         let coordinator = CreateRecordCoordinator(photoAdapter: photoPickerAdapter, searchLocationUseCase: searchLocationUseCase)
         return CreateRecordViewController(
             viewModel: viewModel,
             coordinator: coordinator
         )
+    }
+
+    func makeDetailRecordViewController(record: Record) -> DetailRecordViewController {
+        let viewModel = DetailRecordViewModel(
+            record: record,
+            deleteRecordUseCase: deleteRecordUseCase,
+            updateRecordCaptionUseCase: updateRecordCaptionUseCase
+        )
+        let coordinator = DetailRecordCoordinator()
+        return DetailRecordViewController(viewModel: viewModel, coordinator: coordinator)
     }
 }

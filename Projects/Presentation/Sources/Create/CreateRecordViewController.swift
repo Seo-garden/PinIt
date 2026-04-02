@@ -31,7 +31,7 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
     // MARK: - Lifecycle
     public override func viewDidLoad() {
         super.viewDidLoad()
-        title = AppStrings.Record.newMemoryTitle
+        title = AppStrings.Record.newRecordTitle
     }
 
     public override func viewDidLayoutSubviews() {
