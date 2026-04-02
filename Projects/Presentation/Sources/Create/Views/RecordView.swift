@@ -17,7 +17,10 @@ enum RecordViewMode {
 final class RecordView: UIView {
     // MARK: - State
     private let mode: RecordViewMode
-    var suggestionButtons: [UIButton] { chipButtons }
+    var suggestionButtons: [UIButton] {
+        guard mode == .create else { return [] }
+        return chipButtons
+    }
     // MARK: - UI
     let scrollView: UIScrollView = {
         let view = UIScrollView()
@@ -143,13 +146,13 @@ final class RecordView: UIView {
     
     let locationField = LocationFieldView()
 
-    let chipsScrollView: UIScrollView = {
+    private let chipsScrollView: UIScrollView = {
         let scroll = UIScrollView()
         scroll.showsHorizontalScrollIndicator = false
         return scroll
     }()
 
-    let chipsStackView: UIStackView = {
+    private let chipsStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.spacing = 10
@@ -391,6 +394,7 @@ final class RecordView: UIView {
 
     // MARK: - Public
     func updateChips(_ suggestions: [SuggestedLocation]) {
+        guard mode == .create else { return }
         for (index, button) in chipButtons.enumerated() {
             if index < suggestions.count {
                 let suggestion = suggestions[index]
