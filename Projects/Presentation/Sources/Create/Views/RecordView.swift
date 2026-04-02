@@ -9,9 +9,14 @@ import Domain
 import MapKit
 import UIKit
 
+enum RecordViewMode {
+    case create
+    case detail
+}
+
 final class RecordView: UIView {
     // MARK: - State
-    private let showsPhotoActions: Bool
+    private let mode: RecordViewMode
     var suggestionButtons: [UIButton] { chipButtons }
     // MARK: - UI
     let scrollView: UIScrollView = {
@@ -195,8 +200,8 @@ final class RecordView: UIView {
 
     // MARK: - Init
 
-    init(showsPhotoActions: Bool) {
-        self.showsPhotoActions = showsPhotoActions
+    init(mode: RecordViewMode) {
+        self.mode = mode
         super.init(frame: .zero)
         setupUI()
         setupLayout()
@@ -209,70 +214,74 @@ final class RecordView: UIView {
     // MARK: - Private
     private func setupUI() {
         addSubview(scrollView)
-        addSubview(recordButton)
         scrollView.addSubview(contentView)
 
         [
             photoContainerView,
-            actionStack,
             captionCountLabel,
             captionTitleLabel,
             captionInputView,
             locationTitleLabel,
             locationField,
-            chipsScrollView,
             mapContainerView
         ].forEach { contentView.addSubview($0) }
 
         photoContainerView.addSubview(collectionView)
         photoContainerView.addSubview(photoEmptyLabel)
         photoContainerView.addSubview(pageBadgeLabel)
-        photoContainerView.addSubview(deletePhotoButton)
-
-        if showsPhotoActions {
-            actionStack.addArrangedSubview(takePhotoButton)
-            actionStack.addArrangedSubview(galleryButton)
-        } else {
-            actionStack.isHidden = true
-        }
-
-        chipsScrollView.addSubview(chipsStackView)
-        chipButtons.forEach { chipsStackView.addArrangedSubview($0) }
 
         mapContainerView.addSubview(mapView)
 
-        let views: [UIView] = [
+        var allViews: [UIView] = [
             scrollView,
             contentView,
             photoContainerView,
             collectionView,
             photoEmptyLabel,
             pageBadgeLabel,
-            deletePhotoButton,
-            actionStack,
             captionCountLabel,
             captionTitleLabel,
             captionInputView,
             locationTitleLabel,
             locationField,
-            chipsScrollView,
-            chipsStackView,
             mapContainerView,
-            mapView,
-            recordButton
-        ] + chipButtons
-        views.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
+            mapView
+        ]
+
+        switch mode {
+        case .create:
+            addSubview(recordButton)
+
+            photoContainerView.addSubview(deletePhotoButton)
+            contentView.addSubview(actionStack)
+            contentView.addSubview(chipsScrollView)
+
+            actionStack.addArrangedSubview(takePhotoButton)
+            actionStack.addArrangedSubview(galleryButton)
+
+            chipsScrollView.addSubview(chipsStackView)
+            chipButtons.forEach { chipsStackView.addArrangedSubview($0) }
+
+            allViews += [
+                recordButton,
+                deletePhotoButton,
+                actionStack,
+                chipsScrollView,
+                chipsStackView
+            ] + chipButtons
+
+        case .detail:
+            captionInputView.isUserInteractionEnabled = true
+        }
+
+        allViews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
 
         captionCountLabel.text = "0 / \(MemoryCaptionValidator.maxLength)"
     }
 
     private func setupLayout() {
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: recordButton.topAnchor, constant: -12),
-
+        // MARK: Common constraints
+        var constraints = [
             contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
@@ -299,20 +308,6 @@ final class RecordView: UIView {
             pageBadgeLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 64),
             pageBadgeLabel.heightAnchor.constraint(equalToConstant: 28),
 
-            deletePhotoButton.topAnchor.constraint(equalTo: photoContainerView.topAnchor, constant: 12),
-            deletePhotoButton.trailingAnchor.constraint(equalTo: photoContainerView.trailingAnchor, constant: -12),
-
-            actionStack.topAnchor.constraint(equalTo: photoContainerView.bottomAnchor, constant: 18),
-            actionStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            actionStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-
-            captionCountLabel.topAnchor.constraint(equalTo: actionStack.bottomAnchor, constant: 8),
-            captionCountLabel.centerXAnchor.constraint(equalTo: actionStack.trailingAnchor, constant: -20),
-
-            captionTitleLabel.topAnchor.constraint(equalTo: actionStack.bottomAnchor, constant: 8),
-            captionTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            captionTitleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-
             captionInputView.topAnchor.constraint(equalTo: captionTitleLabel.bottomAnchor, constant: 8),
             captionInputView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             captionInputView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
@@ -325,17 +320,6 @@ final class RecordView: UIView {
             locationField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             locationField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
 
-            chipsScrollView.topAnchor.constraint(equalTo: locationField.bottomAnchor, constant: 12),
-            chipsScrollView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            chipsScrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            chipsScrollView.heightAnchor.constraint(equalToConstant: 36),
-
-            chipsStackView.topAnchor.constraint(equalTo: chipsScrollView.topAnchor),
-            chipsStackView.leadingAnchor.constraint(equalTo: chipsScrollView.leadingAnchor),
-            chipsStackView.trailingAnchor.constraint(equalTo: chipsScrollView.trailingAnchor),
-            chipsStackView.bottomAnchor.constraint(equalTo: chipsScrollView.bottomAnchor),
-
-            mapContainerView.topAnchor.constraint(equalTo: chipsScrollView.bottomAnchor, constant: 16),
             mapContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             mapContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             mapContainerView.heightAnchor.constraint(equalToConstant: 220),
@@ -346,10 +330,63 @@ final class RecordView: UIView {
             mapView.trailingAnchor.constraint(equalTo: mapContainerView.trailingAnchor),
             mapView.bottomAnchor.constraint(equalTo: mapContainerView.bottomAnchor),
 
-            recordButton.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            recordButton.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            recordButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16)
-        ])
+            scrollView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
+        ]
+
+        switch mode {
+        case .create:
+            constraints += [
+                scrollView.bottomAnchor.constraint(equalTo: recordButton.topAnchor, constant: -12),
+
+                deletePhotoButton.topAnchor.constraint(equalTo: photoContainerView.topAnchor, constant: 12),
+                deletePhotoButton.trailingAnchor.constraint(equalTo: photoContainerView.trailingAnchor, constant: -12),
+
+                actionStack.topAnchor.constraint(equalTo: photoContainerView.bottomAnchor, constant: 18),
+                actionStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                actionStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+
+                captionCountLabel.topAnchor.constraint(equalTo: actionStack.bottomAnchor, constant: 8),
+                captionCountLabel.centerXAnchor.constraint(equalTo: actionStack.trailingAnchor, constant: -20),
+
+                captionTitleLabel.topAnchor.constraint(equalTo: actionStack.bottomAnchor, constant: 8),
+                captionTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                captionTitleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+
+                chipsScrollView.topAnchor.constraint(equalTo: locationField.bottomAnchor, constant: 12),
+                chipsScrollView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                chipsScrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                chipsScrollView.heightAnchor.constraint(equalToConstant: 36),
+
+                chipsStackView.topAnchor.constraint(equalTo: chipsScrollView.topAnchor),
+                chipsStackView.leadingAnchor.constraint(equalTo: chipsScrollView.leadingAnchor),
+                chipsStackView.trailingAnchor.constraint(equalTo: chipsScrollView.trailingAnchor),
+                chipsStackView.bottomAnchor.constraint(equalTo: chipsScrollView.bottomAnchor),
+
+                mapContainerView.topAnchor.constraint(equalTo: chipsScrollView.bottomAnchor, constant: 16),
+
+                recordButton.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 20),
+                recordButton.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -20),
+                recordButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            ]
+
+        case .detail:
+            constraints += [
+                scrollView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+
+                captionCountLabel.topAnchor.constraint(equalTo: photoContainerView.bottomAnchor, constant: 18),
+                captionCountLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+
+                captionTitleLabel.topAnchor.constraint(equalTo: photoContainerView.bottomAnchor, constant: 18),
+                captionTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                captionTitleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+
+                mapContainerView.topAnchor.constraint(equalTo: locationField.bottomAnchor, constant: 16),
+            ]
+        }
+
+        NSLayoutConstraint.activate(constraints)
     }
 
     // MARK: - Public
