@@ -22,6 +22,8 @@ enum AppStrings {
         static let galleryDeniedMessage = NSLocalizedString("record.alert.galleryDenied.message", value: "해당 기능을 사용하려면 사진 보관함에서 접근을 허용해주세요.", comment: "")
         static let cameraUnavailableMessage = NSLocalizedString("record.alert.cameraUnavailable", value: "이 기기에서는 카메라를 사용할 수 없습니다.", comment: "")
         static let photoErrorMessage = NSLocalizedString("record.alert.photoError", value: "사진 에러", comment: "")
+        static let createErrorTitle = NSLocalizedString("record.alert.createError.title", value: "기록 저장 실패", comment: "")
+        static let createErrorMessage = NSLocalizedString("record.alert.createError", value: "기록 저장을 실패했습니다. 다시 시도해주세요.", comment: "")
     }
 
     enum Detail {

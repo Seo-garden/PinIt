@@ -288,7 +288,7 @@ public final class CreateRecordViewModel: ViewModelType {
         let saveError = saveResult
             .compactMap { event -> AlertMessage? in
                 if case .error = event {
-                    return AlertMessage(title: "저장 실패", message: "기록 저장에 실패했습니다. 다시 시도해주세요.")
+                    return AlertMessage(title: AppStrings.Record.createErrorTitle, message: AppStrings.Record.createErrorMessage)
                 }
                 return nil
             }
