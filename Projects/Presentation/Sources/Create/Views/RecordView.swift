@@ -12,7 +12,7 @@ import UIKit
 final class RecordView: UIView {
     // MARK: - State
     private let showsPhotoActions: Bool
-
+    var suggestionButtons: [UIButton] { chipButtons }
     // MARK: - UI
     let scrollView: UIScrollView = {
         let view = UIScrollView()
@@ -135,6 +135,7 @@ final class RecordView: UIView {
         label.textColor = .secondaryLabel
         return label
     }()
+    
     let locationField = LocationFieldView()
 
     let chipsScrollView: UIScrollView = {
@@ -172,6 +173,7 @@ final class RecordView: UIView {
         view.clipsToBounds = true
         return view
     }()
+    
     let mapView: MKMapView = {
         let map = MKMapView()
         map.showsUserLocation = false
@@ -366,6 +368,4 @@ final class RecordView: UIView {
         }
         chipsScrollView.isHidden = suggestions.isEmpty
     }
-
-    var suggestionButtons: [UIButton] { chipButtons }
 }

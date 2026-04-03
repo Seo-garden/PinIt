@@ -6,17 +6,17 @@
 //
 
 import AVFoundation
-import CoreLocation
 import Domain
 import Photos
 import UIKit
 
 public final class CreateRecordCoordinator {
-    weak var hostViewController: UIViewController?
     private let photoAdapter: PhotoPickerAdaptable
+    private let searchLocationUseCase: SearchLocationUseCase
 
-    public init(photoAdapter: PhotoPickerAdaptable) {
+    public init(photoAdapter: PhotoPickerAdaptable, searchLocationUseCase: SearchLocationUseCase) {
         self.photoAdapter = photoAdapter
+        self.searchLocationUseCase = searchLocationUseCase
     }
 
     func presentCamera(
@@ -69,6 +69,13 @@ public final class CreateRecordCoordinator {
         }
     }
     
+    func pushLocationSearch(from controller: UIViewController, onLocationSelected: @escaping (LocationSearchItem) -> Void) {
+        let viewModel = LocationSearchViewModel(searchLocationUseCase: searchLocationUseCase)
+        let searchVC = LocationSearchViewController(viewModel: viewModel)
+        searchVC.onLocationSelected = onLocationSelected
+        controller.navigationController?.pushViewController(searchVC, animated: true)
+    }
+
     func showAlert(from controller: UIViewController, title: String, message: String, completion: (() -> Void)? = nil) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in completion?() })

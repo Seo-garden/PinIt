@@ -12,6 +12,10 @@ import UIKit
 
 final class LocationFieldView: UIView {
     private let clearRelay = PublishRelay<Void>()
+    private let tapRelay = PublishRelay<Void>()
+    
+    var clear: Signal<Void> { clearRelay.asSignal() }
+    var tap: Signal<Void> { tapRelay.asSignal() }
 
     private let container: UIView = {
         let view = UIView()
@@ -52,6 +56,9 @@ final class LocationFieldView: UIView {
         [container, titleLabel, clearButton].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
 
         clearButton.addTarget(self, action: #selector(clearAction), for: .touchUpInside)
+
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapField))
+        container.addGestureRecognizer(tapGesture)
     }
 
     private func setupLayout() {
@@ -82,5 +89,5 @@ final class LocationFieldView: UIView {
     
     @objc private func clearAction() { clearRelay.accept(()) }
 
-    var clear: Signal<Void> { clearRelay.asSignal() }
+    @objc private func didTapField() { tapRelay.accept(()) }
 }

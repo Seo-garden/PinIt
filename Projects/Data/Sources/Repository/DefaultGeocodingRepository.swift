@@ -7,7 +7,6 @@
 
 import CoreLocation
 import Domain
-import Foundation
 
 public struct DefaultGeocodingRepository: GeocodingRepository {
     private let geocoderProvider: () -> CLGeocoder

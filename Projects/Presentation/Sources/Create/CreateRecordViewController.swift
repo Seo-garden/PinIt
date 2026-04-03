@@ -17,6 +17,7 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
     private let addPhotosRelay = PublishRelay<[PhotoData]>()
     private let currentPageRelay = PublishRelay<Int>()
     private let selectSuggestedLocationRelay = PublishRelay<Int>()
+    private let searchedLocationRelay = PublishRelay<(name: String, coordinate: Coordinate)>()
     private let recordView = RecordView(showsPhotoActions: true)
     private var currentPhotos: [PhotoData] = []
     
@@ -87,11 +88,22 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
             currentPageChanged: currentPageRelay.asSignal(onErrorSignalWith: .empty()),
             clearLocationTap: recordView.locationField.clear,
             selectSuggestedLocation: selectSuggestedLocationRelay.asSignal(onErrorSignalWith: .empty()),
+            searchedLocation: searchedLocationRelay.asSignal(onErrorSignalWith: .empty()),
             recordTap: recordView.recordButton.rx.tap.asSignal()
         )
         
         closeButton.rx.tap
             .subscribe(onNext: { [weak self] in self?.dismiss(animated: true) })
+            .disposed(by: disposeBag)
+
+        recordView.locationField.tap
+            .emit(onNext: { [weak self] in
+                guard let self else { return }
+                self.coordinator.pushLocationSearch(from: self) { [weak self] item in
+                    guard let coordinate = Coordinate(latitude: item.latitude, longitude: item.longitude) else { return }
+                    self?.searchedLocationRelay.accept((name: item.name, coordinate: coordinate))
+                }
+            })
             .disposed(by: disposeBag)
 
         let output = viewModel.transform(input: input)
