@@ -64,7 +64,7 @@ final class AppDIContainer {
         )
     }
 
-    func makeDetailRecordViewController(record: Record) -> DetailRecordViewController {
+    private func makeDetailRecordViewController(record: Record) -> DetailRecordViewController {
         let viewModel = DetailRecordViewModel(
             record: record,
             deleteRecordUseCase: deleteRecordUseCase,
