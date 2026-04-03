@@ -16,6 +16,7 @@ import RxCocoa
 public final class OnboardingViewController: UIViewController {
     // MARK: core
     private let viewModel: OnboardingViewModel
+    private let onFinished: (() -> Void)?
     private let disposeBag = DisposeBag()
     private var pageWidthConstraints: [NSLayoutConstraint] = []
     private var currentPageIndex = 0
@@ -32,8 +33,9 @@ public final class OnboardingViewController: UIViewController {
     
     
     // MARK: lifecycle
-    public init(viewModel: OnboardingViewModel) {
+    public init(viewModel: OnboardingViewModel, onFinished: (() -> Void)? = nil) {
         self.viewModel = viewModel
+        self.onFinished = onFinished
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -195,6 +197,15 @@ public final class OnboardingViewController: UIViewController {
             .compactMap { $0 }
             .drive(with: self) { owner, page in
                 owner.scrollToPage(index: page.index, animated: true)
+            }
+            .disposed(by: disposeBag)
+
+        viewModel.$isFinished.driver
+            .compactMap { $0 }
+            .distinctUntilChanged()
+            .filter { $0 }
+            .drive(with: self) { owner, _ in
+                owner.onFinished?()
             }
             .disposed(by: disposeBag)
     }

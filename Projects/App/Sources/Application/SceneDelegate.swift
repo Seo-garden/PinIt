@@ -12,6 +12,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
     private let diContainer = AppDIContainer()
+    private var appFlowController: AppFlowController?
     
     func scene(
         _ scene: UIScene,
@@ -21,9 +22,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = diContainer.makeMainTabBarController()
-        window.makeKeyAndVisible()
+        let appFlowController = AppFlowController(window: window, diContainer: diContainer)
+        appFlowController.start()
 
+        self.appFlowController = appFlowController
         self.window = window
     }
 }

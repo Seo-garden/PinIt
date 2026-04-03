@@ -27,7 +27,7 @@ let project = Project.makeModule(
     ),
     sources: ["Sources/**"],
     resources: [
-        "Resources/Assets.xcassets"
+        "Resources/**"
     ],
     dependencies: [
         .project(target: "Core", path: "../Core"),

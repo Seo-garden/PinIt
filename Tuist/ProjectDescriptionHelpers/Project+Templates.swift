@@ -11,6 +11,7 @@ public extension Project {
         sources: SourceFilesList = ["Sources/**"],
         resources: ResourceFileElements? = nil,
         hasTests: Bool = false,
+        settings: Settings? = nil,
         dependencies: [TargetDependency] = [],
     ) -> Project {
         let organizationName = "com.pinit.app"
@@ -25,7 +26,8 @@ public extension Project {
             infoPlist: infoPlist,
             sources: sources,
             resources: resources,
-            dependencies: dependencies
+            dependencies: dependencies,
+            settings: settings
         )
         
         var targets: [Target] = [mainTarget]
