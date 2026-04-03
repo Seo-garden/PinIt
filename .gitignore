@@ -143,6 +143,6 @@ graph.png
 Tuist/Package.resolved
 
 # Firebase app configuration
-Projects/Presentation/Resources/Firebase/GoogleService-Info.plist
+Projects/App/Resources/Firebase/GoogleService-Info.plist
 
 # End of https://www.toptal.com/developers/gitignore/api/swift,xcode,macos
