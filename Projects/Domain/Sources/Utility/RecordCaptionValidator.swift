@@ -1,5 +1,5 @@
 //
-//  MemoryCaptionValidator.swift
+//  RecordCaptionValidator.swift
 //  Domain
 //
 //  Created by 서정원 on 3/14/26.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum MemoryCaptionValidator {
+public enum RecordCaptionValidator {
     public static let maxLength = 300
     
     public static func truncate(_ text: String) -> String {

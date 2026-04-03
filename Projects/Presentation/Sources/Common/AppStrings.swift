@@ -15,13 +15,29 @@ enum AppStrings {
     }
 
     enum Record {
-        static let newMemoryTitle = NSLocalizedString("record.title", value: "오늘을 남기기", comment: "")
+        static let newRecordTitle = NSLocalizedString("record.title", value: "오늘을 남기기", comment: "")
         static let cameraDeniedTitle = NSLocalizedString("record.alert.cameraDenied.title", value: "카메라 접근이 거부되었습니다.", comment: "")
         static let cameraDeniedMessage = NSLocalizedString("record.alert.cameraDenied.message", value: "해당 기능을 사용하려면 카메라에서 권한을 허용해주세요.", comment: "")
         static let galleryDeniedTitle = NSLocalizedString("record.alert.galleryDenied.title", value: "사진 보관함 접근이 거부되었습니다.", comment: "")
         static let galleryDeniedMessage = NSLocalizedString("record.alert.galleryDenied.message", value: "해당 기능을 사용하려면 사진 보관함에서 접근을 허용해주세요.", comment: "")
         static let cameraUnavailableMessage = NSLocalizedString("record.alert.cameraUnavailable", value: "이 기기에서는 카메라를 사용할 수 없습니다.", comment: "")
         static let photoErrorMessage = NSLocalizedString("record.alert.photoError", value: "사진 에러", comment: "")
+        static let createErrorTitle = NSLocalizedString("record.alert.createError.title", value: "기록 저장 실패", comment: "")
+        static let createErrorMessage = NSLocalizedString("record.alert.createError", value: "기록 저장을 실패했습니다. 다시 시도해주세요.", comment: "")
+    }
+
+    enum Detail {
+        static let title = NSLocalizedString("detail.title", value: "기록 상세", comment: "")
+        static let deleteTitle = NSLocalizedString("detail.alert.delete.title", value: "기록 삭제", comment: "")
+        static let deleteMessage = NSLocalizedString("detail.alert.delete.message", value: "이 기록을 삭제하시겠습니까?\n삭제된 기록은 복구할 수 없습니다.", comment: "")
+        static let delete = NSLocalizedString("detail.alert.delete.action", value: "삭제", comment: "")
+        static let save = NSLocalizedString("detail.save", value: "저장", comment: "")
+        static let saveFailTitle = NSLocalizedString("detail.alert.saveFail.title", value: "저장 실패", comment: "")
+        static let saveFailMessage = NSLocalizedString("detail.alert.saveFail.message", value: "캡션 저장에 실패했습니다. 다시 시도해주세요.", comment: "")
+        static let deleteFailTitle = NSLocalizedString("detail.alert.deleteFail.title", value: "삭제 실패", comment: "")
+        static let deleteFailMessage = NSLocalizedString("detail.alert.deleteFail.message", value: "기록 삭제에 실패했습니다. 다시 시도해주세요.", comment: "")
+        static let emptyCaptionTitle = NSLocalizedString("detail.alert.emptyCaption.title", value: "캡션 필요", comment: "")
+        static let emptyCaptionMessage = NSLocalizedString("detail.alert.emptyCaption.message", value: "캡션을 비우고 저장할 수 없습니다!", comment: "")
     }
 
     enum Search {

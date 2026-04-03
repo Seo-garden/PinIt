@@ -1,5 +1,5 @@
 //
-//  MemoryDraft.swift
+//  RecordDraft.swift
 //  Domain
 //
 //  Created by 서정원 on 3/13/26.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct MemoryDraft {
+public struct RecordDraft {
     public var photoDataList: [PhotoData]
     public var caption: String
     public var locationName: String?

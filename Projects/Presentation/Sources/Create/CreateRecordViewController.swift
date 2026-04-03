@@ -18,7 +18,7 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
     private let currentPageRelay = PublishRelay<Int>()
     private let selectSuggestedLocationRelay = PublishRelay<Int>()
     private let searchedLocationRelay = PublishRelay<(name: String, coordinate: Coordinate)>()
-    private let recordView = RecordView(showsPhotoActions: true)
+    private let recordView = RecordView(mode: .create)
     private var currentPhotos: [PhotoData] = []
     
     private let closeButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil)
@@ -31,7 +31,7 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
     // MARK: - Lifecycle
     public override func viewDidLoad() {
         super.viewDidLoad()
-        title = AppStrings.Record.newMemoryTitle
+        title = AppStrings.Record.newRecordTitle
     }
 
     public override func viewDidLayoutSubviews() {
