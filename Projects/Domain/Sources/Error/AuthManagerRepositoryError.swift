@@ -1,16 +1,11 @@
 //
-//  AuthManagerInterface.swift
-//  Presentation
+//  AuthManagerRepositoryError.swift
+//  Domain
 //
-//  Created by 김민우 on 3/20/26.
+//  Created by 서정원 on 4/6/26.
 //
 
 import Foundation
-import RxSwift
-
-public protocol AuthManagerInterface {
-    func signIn(email: String, password: String) -> Single<String>
-}
 
 public enum AuthManagerRepositoryError: LocalizedError {
     case firebaseNotConfigured

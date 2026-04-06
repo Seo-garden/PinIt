@@ -5,6 +5,7 @@
 //  Created by 김민우 on 3/12/26.
 //
 
+import Domain
 import UIKit
 import SwiftUI
 import RxSwift
@@ -355,10 +356,4 @@ extension OnboardingViewController: UIScrollViewDelegate {
     public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         updateCurrentPageIfNeeded()
     }
-}
-
-
-// MARK: preview
-#Preview {
-    OnboardingViewController(viewModel: .init())
 }

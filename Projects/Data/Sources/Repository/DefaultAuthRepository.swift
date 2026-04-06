@@ -1,40 +1,37 @@
 //
-//  AuthManagerRepository.swift
-//  Presentation
+//  DefaultAuthRepository.swift
+//  Data
 //
-//  Created by 김민우 on 3/24/26.
+//  Created by 서정원 on 4/6/26.
 //
 
+import Domain
 import Foundation
 import FirebaseAuth
 import FirebaseCore
-import RxSwift
 
-public final class AuthManagerRepository: AuthManagerInterface {
+public final class DefaultAuthRepository: AuthRepository, @unchecked Sendable {
     public init() { }
 
-    public func signIn(email: String, password: String) -> Single<String> {
-        Single.create { single in
-            guard PresentationFirebaseBootstrap.configureIfNeeded() else {
-                single(.failure(AuthManagerRepositoryError.firebaseNotConfigured))
-                return Disposables.create()
-            }
+    public func signIn(email: String, password: String) async throws -> String {
+        guard FirebaseBootstrap.configureIfNeeded() else {
+            throw AuthManagerRepositoryError.firebaseNotConfigured
+        }
 
+        return try await withCheckedThrowingContinuation { continuation in
             Auth.auth().signIn(withEmail: email, password: password) { result, error in
                 if let error {
-                    single(.failure(Self.map(error)))
+                    continuation.resume(throwing: Self.map(error))
                     return
                 }
 
                 guard let email = result?.user.email else {
-                    single(.failure(AuthManagerRepositoryError.missingUserEmail))
+                    continuation.resume(throwing: AuthManagerRepositoryError.missingUserEmail)
                     return
                 }
 
-                single(.success(email))
+                continuation.resume(returning: email)
             }
-
-            return Disposables.create()
         }
     }
 

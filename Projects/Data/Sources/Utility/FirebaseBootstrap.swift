@@ -1,16 +1,16 @@
 //
-//  PresentationFirebaseBootstrap.swift
-//  Presentation
+//  FirebaseBootstrap.swift
+//  Data
 //
-//  Created by 김민우 on 3/24/26.
+//  Created by 서정원 on 4/6/26.
 //
 
 import Foundation
 import FirebaseCore
 
-enum PresentationFirebaseBootstrap {
+public enum FirebaseBootstrap {
     @discardableResult
-    static func configureIfNeeded() -> Bool {
+    public static func configureIfNeeded() -> Bool {
         if FirebaseApp.isDefaultAppConfigured() {
             return true
         }

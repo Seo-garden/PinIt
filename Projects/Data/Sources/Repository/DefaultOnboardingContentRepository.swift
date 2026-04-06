@@ -1,17 +1,15 @@
 //
-//  RemoteOnboardingRepository.swift
-//  Presentation
+//  DefaultOnboardingContentRepository.swift
+//  Data
 //
-//  Created by 김민우 on 3/13/26.
+//  Created by 서정원 on 4/6/26.
 //
 
+import Domain
 import Foundation
 import OSLog
 
-
-// MARK: object
-actor RemoteOnboardingRepository: RemoteOnboardingInterface {
-    // MARK: core
+public final class DefaultOnboardingContentRepository: OnboardingContentRepository, @unchecked Sendable {
     private let logger = Logger()
     private static let fetchDelay: Duration = .milliseconds(300)
     private static let dummyContent = OnboardingContent(
@@ -44,27 +42,20 @@ actor RemoteOnboardingRepository: RemoteOnboardingInterface {
             )
         ]
     )
-    
-    
-    // MARK: state
-    var onboardingContent: OnboardingContent? = nil
-    
-    
-    // MARK: action
-    func fetchContent() async {
+
+    public init() { }
+
+    public func fetchContent() async -> OnboardingContent? {
         logger.debug("온보딩 컨텐츠 더미 fetch 시작")
-        
+
         do {
             try await Task.sleep(for: Self.fetchDelay)
         } catch {
             logger.error("온보딩 컨텐츠 더미 fetch 대기 중 취소됨")
-            return
+            return nil
         }
-        
-        onboardingContent = Self.dummyContent
+
         logger.debug("온보딩 컨텐츠 더미 fetch 완료: \(Self.dummyContent.pages.count, privacy: .public)개 페이지")
+        return Self.dummyContent
     }
-    
-    
-    // MARK: value
 }

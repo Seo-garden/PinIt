@@ -5,6 +5,7 @@
 //  Created by 김민우 on 3/20/26.
 //
 
+import Domain
 import Foundation
 import RxCocoa
 import RxRelay
@@ -15,13 +16,12 @@ import OSLog
 // MARK: object
 @MainActor
 public final class LoginViewModel: ViewModelType {
-    private let authManagerRepository: any AuthManagerInterface
+    private let authRepository: any AuthRepository
     private let logger = Logger()
     private let disposeBag = DisposeBag()
 
-    public init(authManagerRepository: any AuthManagerInterface = AuthManagerRepository()) {
-        PresentationFirebaseBootstrap.configureIfNeeded()
-        self.authManagerRepository = authManagerRepository
+    public init(authRepository: any AuthRepository) {
+        self.authRepository = authRepository
     }
 
     public struct Input {
@@ -81,20 +81,18 @@ public final class LoginViewModel: ViewModelType {
                 isLoadingRelay.accept(true)
                 logger.log("Login requested for \(email, privacy: .private(mask: .hash))")
 
-                self.authManagerRepository.signIn(email: email, password: password)
-                    .observe(on: MainScheduler.instance)
-                    .subscribe(
-                        onSuccess: { message in
-                            isLoadingRelay.accept(false)
-                            loginSucceededRelay.accept("\(message) 계정으로 로그인되었습니다.")
-                        },
-                        onFailure: { error in
-                            self.logger.error("Login failed: \(error.localizedDescription, privacy: .public)")
-                            isLoadingRelay.accept(false)
-                            errorMessageRelay.accept(Self.makeErrorMessage(from: error))
-                        }
-                    )
-                    .disposed(by: self.disposeBag)
+                Task { [weak self] in
+                    guard let self else { return }
+                    do {
+                        let resultEmail = try await self.authRepository.signIn(email: email, password: password)
+                        isLoadingRelay.accept(false)
+                        loginSucceededRelay.accept("\(resultEmail) 계정으로 로그인되었습니다.")
+                    } catch {
+                        self.logger.error("Login failed: \(error.localizedDescription, privacy: .public)")
+                        isLoadingRelay.accept(false)
+                        errorMessageRelay.accept(Self.makeErrorMessage(from: error))
+                    }
+                }
             })
             .disposed(by: disposeBag)
 

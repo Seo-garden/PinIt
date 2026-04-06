@@ -17,6 +17,10 @@ final class AppDIContainer {
     private lazy var photoRepository: PhotoRepository = DefaultPhotoRepository()
     private lazy var locationRepository: LocationRepository = DefaultLocationRepository()
     private lazy var recordRepository: RecordRepository = InMemoryRecordRepository()
+    private lazy var authRepository: AuthRepository = DefaultAuthRepository()
+    private lazy var authSessionRepository: AuthSessionRepository = DefaultAuthSessionRepository()
+    private lazy var onboardingContentRepository: OnboardingContentRepository = DefaultOnboardingContentRepository()
+    private lazy var onboardingStatusRepository: OnboardingStatusRepository = DefaultOnboardingStatusRepository()
 
     // MARK: - UseCase
     private lazy var reverseGeocodeUseCase: ReverseGeocodeUseCase = DefaultReverseGeocodeUseCase(repository: geocodingRepository)
@@ -31,18 +35,21 @@ final class AppDIContainer {
 
     // MARK: - Adapter
     private lazy var photoPickerAdapter: PhotoPickerAdaptable = PhotoPickerAdapter(photoRepository: photoRepository, fetchUserLocationUseCase: fetchUserLocationUseCase)
-    
+
     // MARK: - Factory
     func makeOnboardingViewController(onFinished: @escaping () -> Void) -> OnboardingViewController {
         OnboardingViewController(
-            viewModel: OnboardingViewModel(),
+            viewModel: OnboardingViewModel(
+                onboardingContentRepo: onboardingContentRepository,
+                onboardingStatusRepo: onboardingStatusRepository
+            ),
             onFinished: onFinished
         )
     }
 
     func makeLoginViewController(onLoginSucceeded: @escaping () -> Void) -> UINavigationController {
         let viewController = LoginViewController(
-            viewModel: LoginViewModel(),
+            viewModel: LoginViewModel(authRepository: authRepository),
             onLoginSucceeded: onLoginSucceeded
         )
         return UINavigationController(rootViewController: viewController)

@@ -5,6 +5,7 @@
 //  Created by 김민우 on 3/20/26.
 //
 
+import Domain
 import UIKit
 import RxCocoa
 import RxSwift
@@ -286,16 +287,5 @@ public final class LoginViewController: BaseViewController<LoginViewModel> {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         present(alert, animated: true)
-    }
-}
-
-
-#Preview {
-    LoginViewController(viewModel: LoginViewModel(authManagerRepository: PreviewAuthManagerRepository()))
-}
-
-private struct PreviewAuthManagerRepository: AuthManagerInterface {
-    func signIn(email: String, password: String) -> Single<String> {
-        .just(email)
     }
 }

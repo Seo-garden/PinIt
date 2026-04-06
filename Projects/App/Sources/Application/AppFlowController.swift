@@ -5,6 +5,7 @@
 //  Created by Codex on 3/24/26.
 //
 
+import Domain
 import Presentation
 import UIKit
 
@@ -18,7 +19,7 @@ final class AppFlowController {
 
     private weak var window: UIWindow?
     private let diContainer: AppDIContainer
-    private let authSessionRepository: any AuthSessionInterface
+    private let authSessionRepository: any AuthSessionRepository
     private let defaults: UserDefaults
 
     private static let hasCompletedOnboardingKey = "hasCompletedOnboarding"
@@ -26,7 +27,7 @@ final class AppFlowController {
     init(
         window: UIWindow,
         diContainer: AppDIContainer,
-        authSessionRepository: any AuthSessionInterface = AuthSessionRepository(),
+        authSessionRepository: any AuthSessionRepository,
         defaults: UserDefaults = .standard
     ) {
         self.window = window
