@@ -19,7 +19,7 @@ final class AppFlowController {
 
     private weak var window: UIWindow?
     private let diContainer: AppDIContainer
-    private let authSessionRepository: any AuthSessionRepository
+    private let authSessionRepository: AuthSessionRepository
     private let defaults: UserDefaults
 
     private static let hasCompletedOnboardingKey = "hasCompletedOnboarding"
@@ -27,7 +27,7 @@ final class AppFlowController {
     init(
         window: UIWindow,
         diContainer: AppDIContainer,
-        authSessionRepository: any AuthSessionRepository,
+        authSessionRepository: AuthSessionRepository,
         defaults: UserDefaults = .standard
     ) {
         self.window = window
