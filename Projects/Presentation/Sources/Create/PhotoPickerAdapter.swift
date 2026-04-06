@@ -10,13 +10,15 @@ import PhotosUI
 import UIKit
 
 public final class PhotoPickerAdapter: NSObject, PhotoPickerAdaptable {
-    private let photoRepository: PhotoRepository
+    private let loadPhotoFromCameraUseCase: LoadPhotoFromCameraUseCase
+    private let loadPhotoFromGalleryUseCase: LoadPhotoFromGalleryUseCase
     private let fetchUserLocationUseCase: FetchUserLocationUseCase
     private var completion: ((Result<[PhotoData], PhotoError>) -> Void)?
     private var fallbackCoordinate: Coordinate?
 
-    public init(photoRepository: PhotoRepository, fetchUserLocationUseCase: FetchUserLocationUseCase) {
-        self.photoRepository = photoRepository
+    public init(loadPhotoFromCameraUseCase: LoadPhotoFromCameraUseCase, loadPhotoFromGalleryUseCase: LoadPhotoFromGalleryUseCase, fetchUserLocationUseCase: FetchUserLocationUseCase) {
+        self.loadPhotoFromCameraUseCase = loadPhotoFromCameraUseCase
+        self.loadPhotoFromGalleryUseCase = loadPhotoFromGalleryUseCase
         self.fetchUserLocationUseCase = fetchUserLocationUseCase
         super.init()
     }
@@ -73,7 +75,7 @@ extension PhotoPickerAdapter: UIImagePickerControllerDelegate, UINavigationContr
             
             let metadata = info[.mediaMetadata] as? [AnyHashable: Any] ?? [:]
             let fallback = self.fallbackCoordinate
-            self.photoRepository.loadFromCamera(imageData: imageData, metadata: metadata) { [weak self] result in
+            self.loadPhotoFromCameraUseCase.execute(imageData: imageData, metadata: metadata) { [weak self] result in
                 switch result {
                 case .success(let photos):
                     let adjusted = photos.map { photo in
@@ -109,7 +111,7 @@ extension PhotoPickerAdapter: PHPickerViewControllerDelegate {
             return
         }
 
-        photoRepository.loadFromGallery(assetIdentifiers: identifiers) { [weak self] result in
+        loadPhotoFromGalleryUseCase.execute(assetIdentifiers: identifiers) { [weak self] result in
             self?.completion?(result)
             self?.completion = nil
         }
