@@ -84,7 +84,7 @@ public final class OnboardingViewController: UIViewController {
     }
     
     private func configureStyle() {
-        view.backgroundColor = UIColor(red: 245 / 255, green: 246 / 255, blue: 250 / 255, alpha: 1)
+        view.backgroundColor = .systemGroupedBackground
         
         pagingScrollView.isPagingEnabled = true
         pagingScrollView.showsHorizontalScrollIndicator = false
@@ -99,7 +99,7 @@ public final class OnboardingViewController: UIViewController {
         pageControl.currentPage = 0
         pageControl.numberOfPages = 0
         pageControl.currentPageIndicatorTintColor = UIColor(red: 24 / 255, green: 119 / 255, blue: 242 / 255, alpha: 1)
-        pageControl.pageIndicatorTintColor = UIColor(white: 0.82, alpha: 1)
+        pageControl.pageIndicatorTintColor = .systemGray4
         pageControl.hidesForSinglePage = true
         
         buttonStackView.axis = .horizontal
@@ -118,8 +118,8 @@ public final class OnboardingViewController: UIViewController {
         
         var finishConfiguration = UIButton.Configuration.filled()
         finishConfiguration.title = "시작하기"
-        finishConfiguration.baseBackgroundColor = .black
-        finishConfiguration.baseForegroundColor = .white
+        finishConfiguration.baseBackgroundColor = .label
+        finishConfiguration.baseForegroundColor = .systemBackground
         finishConfiguration.cornerStyle = .capsule
         finishConfiguration.contentInsets = NSDirectionalEdgeInsets(top: 18, leading: 20, bottom: 18, trailing: 20)
         finishButton.configuration = finishConfiguration
@@ -270,7 +270,7 @@ public final class OnboardingViewController: UIViewController {
         headlineLabel.numberOfLines = 0
         headlineLabel.textAlignment = .center
         headlineLabel.font = .systemFont(ofSize: 30, weight: .bold)
-        headlineLabel.textColor = .black
+        headlineLabel.textColor = .label
         
         NSLayoutConstraint.activate([
             illustrationView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),

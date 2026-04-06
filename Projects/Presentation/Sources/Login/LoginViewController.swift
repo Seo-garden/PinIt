@@ -41,7 +41,7 @@ public final class LoginViewController: BaseViewController<LoginViewModel> {
     }
 
     public override func setupUI() {
-        view.backgroundColor = UIColor(red: 245 / 255, green: 246 / 255, blue: 250 / 255, alpha: 1)
+        view.backgroundColor = .systemGroupedBackground
         title = "로그인"
         navigationItem.largeTitleDisplayMode = .never
 
@@ -92,7 +92,7 @@ public final class LoginViewController: BaseViewController<LoginViewModel> {
         formStackView.spacing = 12
         formStackView.alignment = .fill
 
-        formCardView.backgroundColor = .white
+        formCardView.backgroundColor = .secondarySystemGroupedBackground
         formCardView.layer.cornerRadius = 28
         formCardView.layer.shadowColor = UIColor.black.withAlphaComponent(0.08).cgColor
         formCardView.layer.shadowOpacity = 1
@@ -255,10 +255,10 @@ public final class LoginViewController: BaseViewController<LoginViewModel> {
         textField.autocapitalizationType = .none
         textField.autocorrectionType = .no
         textField.borderStyle = .none
-        textField.backgroundColor = UIColor(red: 245 / 255, green: 246 / 255, blue: 250 / 255, alpha: 1)
+        textField.backgroundColor = .tertiarySystemFill
         textField.layer.cornerRadius = 20
         textField.layer.borderWidth = 1
-        textField.layer.borderColor = UIColor(red: 229 / 255, green: 232 / 255, blue: 238 / 255, alpha: 1).cgColor
+        textField.layer.borderColor = UIColor.separator.cgColor
         textField.font = .systemFont(ofSize: 16, weight: .medium)
         textField.leftView = makeTextFieldPaddingView()
         textField.leftViewMode = .always
@@ -276,6 +276,14 @@ public final class LoginViewController: BaseViewController<LoginViewModel> {
         configuration.imagePadding = 8
         loginButton.configuration = configuration
         loginButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
+    }
+
+    public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        guard traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else { return }
+        emailTextField.layer.borderColor = UIColor.separator.cgColor
+        passwordTextField.layer.borderColor = UIColor.separator.cgColor
+        formCardView.layer.shadowColor = UIColor.black.withAlphaComponent(0.08).cgColor
     }
 
     private func makeTextFieldPaddingView() -> UIView {
