@@ -9,7 +9,6 @@ import Foundation
 import FirebaseCore
 
 public enum FirebaseBootstrap {
-    @discardableResult
     public static func configureIfNeeded() -> Bool {
         if FirebaseApp.isDefaultAppConfigured() {
             return true

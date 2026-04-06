@@ -18,6 +18,7 @@ final class AppDIContainer {
     private lazy var locationRepository: LocationRepository = DefaultLocationRepository()
     private lazy var recordRepository: RecordRepository = InMemoryRecordRepository()
     private lazy var authRepository: AuthRepository = DefaultAuthRepository()
+    private lazy var locationSearchRepository: LocationSearchRepository = DefaultLocationSearchRepository()
     private lazy var authSessionRepository: AuthSessionRepository = DefaultAuthSessionRepository()
     private lazy var onboardingContentRepository: OnboardingContentRepository = DefaultOnboardingContentRepository()
     private lazy var onboardingStatusRepository: OnboardingStatusRepository = DefaultOnboardingStatusRepository()
@@ -26,15 +27,17 @@ final class AppDIContainer {
     private lazy var reverseGeocodeUseCase: ReverseGeocodeUseCase = DefaultReverseGeocodeUseCase(repository: geocodingRepository)
     private lazy var locationSuggestionUseCase: LocationSuggestionUseCase = DefaultLocationSuggestionUseCase(reverseGeocodeUseCase: reverseGeocodeUseCase)
     private lazy var fetchUserLocationUseCase: FetchUserLocationUseCase = DefaultFetchUserLocationUseCase(repository: locationRepository)
-    private lazy var locationSearchRepository: LocationSearchRepository = DefaultLocationSearchRepository()
     private lazy var searchLocationUseCase: SearchLocationUseCase = DefaultSearchLocationUseCase(repository: locationSearchRepository)
     private lazy var saveRecordUseCase: SaveRecordUseCase = DefaultSaveRecordUseCase(repository: recordRepository)
     private lazy var fetchAllRecordsUseCase: FetchAllRecordsUseCase = DefaultFetchAllRecordsUseCase(repository: recordRepository)
     private lazy var deleteRecordUseCase: DeleteRecordUseCase = DefaultDeleteRecordUseCase(repository: recordRepository)
     private lazy var updateRecordCaptionUseCase: UpdateRecordCaptionUseCase = DefaultUpdateRecordCaptionUseCase(repository: recordRepository)
+    private lazy var signInUseCase: SignInUseCase = DefaultSignInUseCase(authRepository: authRepository)
+    private lazy var loadPhotoFromCameraUseCase: LoadPhotoFromCameraUseCase = DefaultLoadPhotoFromCameraUseCase(repository: photoRepository)
+    private lazy var loadPhotoFromGalleryUseCase: LoadPhotoFromGalleryUseCase = DefaultLoadPhotoFromGalleryUseCase(repository: photoRepository)
 
     // MARK: - Adapter
-    private lazy var photoPickerAdapter: PhotoPickerAdaptable = PhotoPickerAdapter(photoRepository: photoRepository, fetchUserLocationUseCase: fetchUserLocationUseCase)
+    private lazy var photoPickerAdapter: PhotoPickerAdaptable = PhotoPickerAdapter(loadPhotoFromCameraUseCase: loadPhotoFromCameraUseCase, loadPhotoFromGalleryUseCase: loadPhotoFromGalleryUseCase, fetchUserLocationUseCase: fetchUserLocationUseCase)
 
     // MARK: - Factory
     func makeOnboardingViewController(onFinished: @escaping () -> Void) -> OnboardingViewController {
@@ -49,7 +52,7 @@ final class AppDIContainer {
 
     func makeLoginViewController(onLoginSucceeded: @escaping () -> Void) -> UINavigationController {
         let viewController = LoginViewController(
-            viewModel: LoginViewModel(authRepository: authRepository),
+            viewModel: LoginViewModel(signInUseCase: signInUseCase),
             onLoginSucceeded: onLoginSucceeded
         )
         return UINavigationController(rootViewController: viewController)
