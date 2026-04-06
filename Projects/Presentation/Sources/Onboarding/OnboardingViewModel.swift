@@ -17,12 +17,12 @@ import Expose
 public final class OnboardingViewModel {
     // MARK: core
     private let logger = Logger()
-    private let onboardingContentRepo: any OnboardingContentRepository
-    private let onboardingStatusRepo: any OnboardingStatusRepository
+    private let onboardingContentRepo: OnboardingContentRepository
+    private let onboardingStatusRepo: OnboardingStatusRepository
 
     public init(
-        onboardingContentRepo: any OnboardingContentRepository,
-        onboardingStatusRepo: any OnboardingStatusRepository
+        onboardingContentRepo: OnboardingContentRepository,
+        onboardingStatusRepo: OnboardingStatusRepository
     ) {
         self.onboardingContentRepo = onboardingContentRepo
         self.onboardingStatusRepo = onboardingStatusRepo

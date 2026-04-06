@@ -16,12 +16,12 @@ import OSLog
 // MARK: object
 @MainActor
 public final class LoginViewModel: ViewModelType {
-    private let authRepository: any AuthRepository
+    private let signInUseCase: SignInUseCase
     private let logger = Logger()
     private let disposeBag = DisposeBag()
 
-    public init(authRepository: any AuthRepository) {
-        self.authRepository = authRepository
+    public init(signInUseCase: SignInUseCase) {
+        self.signInUseCase = signInUseCase
     }
 
     public struct Input {
@@ -84,7 +84,7 @@ public final class LoginViewModel: ViewModelType {
                 Task { [weak self] in
                     guard let self else { return }
                     do {
-                        let resultEmail = try await self.authRepository.signIn(email: email, password: password)
+                        let resultEmail = try await self.signInUseCase.execute(email: email, password: password)
                         isLoadingRelay.accept(false)
                         loginSucceededRelay.accept("\(resultEmail) 계정으로 로그인되었습니다.")
                     } catch {
