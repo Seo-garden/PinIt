@@ -7,4 +7,6 @@
 
 public protocol AuthSessionRepository: Sendable {
     func isSignedIn() -> Bool
+    func currentUserEmail() -> String?
+    func currentUserDisplayName() -> String?
 }

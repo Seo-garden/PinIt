@@ -13,29 +13,77 @@ import FirebaseCore
 public final class DefaultAuthRepository: AuthRepository, @unchecked Sendable {
     public init() { }
 
-    public func signIn(email: String, password: String) async throws -> String {
+    public func signIn(email: String, password: String, completion: @escaping (Result<String, AuthError>) -> Void) {
         guard FirebaseBootstrap.configureIfNeeded() else {
-            throw AuthManagerRepositoryError.firebaseNotConfigured
+            completion(.failure(.firebaseNotConfigured))
+            return
         }
 
-        return try await withCheckedThrowingContinuation { continuation in
-            Auth.auth().signIn(withEmail: email, password: password) { result, error in
-                if let error {
-                    continuation.resume(throwing: Self.map(error))
-                    return
-                }
+        Auth.auth().signIn(withEmail: email, password: password) { result, error in
+            if let error {
+                completion(.failure(Self.map(error)))
+                return
+            }
 
-                guard let email = result?.user.email else {
-                    continuation.resume(throwing: AuthManagerRepositoryError.missingUserEmail)
-                    return
-                }
+            guard let email = result?.user.email else {
+                completion(.failure(.missingUserEmail))
+                return
+            }
 
-                continuation.resume(returning: email)
+            completion(.success(email))
+        }
+    }
+
+    public func signOut(completion: @escaping (Result<Void, AuthError>) -> Void) {
+        guard FirebaseBootstrap.configureIfNeeded() else {
+            completion(.failure(.firebaseNotConfigured))
+            return
+        }
+
+        do {
+            try Auth.auth().signOut()
+            completion(.success(()))
+        } catch {
+            completion(.failure(.unknown))
+        }
+    }
+
+    public func deleteAccount(completion: @escaping (Result<Void, AuthError>) -> Void) {
+        guard FirebaseBootstrap.configureIfNeeded() else {
+            completion(.failure(.firebaseNotConfigured))
+            return
+        }
+
+        guard let user = Auth.auth().currentUser else {
+            completion(.failure(.userNotFound))
+            return
+        }
+
+        user.delete { error in
+            if let error {
+                completion(.failure(Self.map(error)))
+            } else {
+                completion(.success(()))
             }
         }
     }
 
-    private static func map(_ error: Error) -> AuthManagerRepositoryError {
+    public func resetPassword(email: String, completion: @escaping (Result<Void, AuthError>) -> Void) {
+        guard FirebaseBootstrap.configureIfNeeded() else {
+            completion(.failure(.firebaseNotConfigured))
+            return
+        }
+
+        Auth.auth().sendPasswordReset(withEmail: email) { error in
+            if let error {
+                completion(.failure(Self.map(error)))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+    private static func map(_ error: Error) -> AuthError {
         guard let errorCode = AuthErrorCode(rawValue: (error as NSError).code) else {
             return .unknown
         }
