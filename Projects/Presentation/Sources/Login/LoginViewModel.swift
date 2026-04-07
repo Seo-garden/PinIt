@@ -14,7 +14,6 @@ import OSLog
 
 
 // MARK: object
-@MainActor
 public final class LoginViewModel: ViewModelType {
     private let signInUseCase: SignInUseCase
     private let logger = Logger()
@@ -81,7 +80,7 @@ public final class LoginViewModel: ViewModelType {
                 isLoadingRelay.accept(true)
                 logger.log("Login requested for \(email, privacy: .private(mask: .hash))")
 
-                Task { [weak self] in
+                Task { @MainActor [weak self] in
                     guard let self else { return }
                     do {
                         let resultEmail = try await self.signInUseCase.execute(email: email, password: password)
