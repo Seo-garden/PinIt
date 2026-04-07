@@ -80,16 +80,15 @@ public final class LoginViewModel: ViewModelType {
                 isLoadingRelay.accept(true)
                 logger.log("Login requested for \(email, privacy: .private(mask: .hash))")
 
-                Task { @MainActor [weak self] in
+                self.signInUseCase.execute(email: email, password: password) { [weak self] result in
                     guard let self else { return }
-                    do {
-                        let resultEmail = try await self.signInUseCase.execute(email: email, password: password)
-                        isLoadingRelay.accept(false)
+                    isLoadingRelay.accept(false)
+                    switch result {
+                    case .success(let resultEmail):
                         loginSucceededRelay.accept("\(resultEmail) 계정으로 로그인되었습니다.")
-                    } catch {
-                        self.logger.error("Login failed: \(error.localizedDescription, privacy: .public)")
-                        isLoadingRelay.accept(false)
-                        errorMessageRelay.accept(Self.makeErrorMessage(from: error))
+                    case .failure(let error):
+                        self.logger.error("Login failed: \(error.localizedDescription ?? "unknown", privacy: .public)")
+                        errorMessageRelay.accept(error.localizedDescription ?? "로그인에 실패했습니다.")
                     }
                 }
             })
@@ -101,14 +100,6 @@ public final class LoginViewModel: ViewModelType {
             errorMessage: errorMessageRelay.asSignal(),
             loginSucceeded: loginSucceededRelay.asSignal()
         )
-    }
-
-    private static func makeErrorMessage(from error: Error) -> String {
-        if let authError = error as? AuthManagerRepositoryError {
-            return authError.localizedDescription
-        }
-
-        return "로그인에 실패했습니다. 잠시 후 다시 시도해주세요."
     }
 
     private static func isValidEmail(_ email: String) -> Bool {
