@@ -63,7 +63,9 @@ final class AppFlowController {
                 self?.transition(to: .main, animated: true)
             }
         case .main:
-            viewController = diContainer.makeMainTabBarController()
+            viewController = diContainer.makeMainTabBarController { [weak self] in
+                self?.transition(to: .login, animated: true)
+            }
         }
 
         setRootViewController(viewController, animated: animated)

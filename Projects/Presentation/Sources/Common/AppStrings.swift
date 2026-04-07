@@ -45,6 +45,18 @@ enum AppStrings {
         static let errorTitle = NSLocalizedString("search.alert.error.title", value: "검색 오류", comment: "")
     }
 
+    enum Setting {
+        static let pushNotifications = NSLocalizedString("setting.pushNotifications", value: "알림 설정", comment: "")
+        static let privacyPolicy = NSLocalizedString("setting.privacyPolicy", value: "개인정보처리방침", comment: "")
+        static let termsOfService = NSLocalizedString("setting.termsOfService", value: "이용약관", comment: "")
+        static let changePassword = NSLocalizedString("setting.changePassword", value: "비밀번호 재설정", comment: "")
+        static let logout = NSLocalizedString("setting.logout", value: "로그아웃", comment: "")
+        static let deleteAccount = NSLocalizedString("setting.deleteAccount", value: "회원 탈퇴", comment: "")
+        static let deleteAccountConfirmTitle = NSLocalizedString("setting.deleteAccount.confirm.title", value: "회원탈퇴", comment: "")
+        static let deleteAccountConfirmMessage = NSLocalizedString("setting.deleteAccount.confirm.message", value: "정말로 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.", comment: "")
+        static let errorTitle = NSLocalizedString("setting.error.title", value: "설정 오류", comment: "")
+    }
+
     enum Map {
         static let locationDeniedTitle = NSLocalizedString("map.alert.locationDenied.title", value: "위치 권한이 필요합니다", comment: "")
         static let locationDeniedMessage = NSLocalizedString("map.alert.locationDenied.message", value: "해당 기능을 사용하려면 위치에서 접근을 허용해주세요.", comment: "")
