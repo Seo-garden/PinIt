@@ -34,7 +34,7 @@ public final class SettingViewModel: ViewModelType {
     }
 
     public struct Output {
-        let displayName: Driver<String>
+        let name: Driver<String>
         let email: Driver<String>
         let logoutSucceeded: Signal<Void>
         let deleteAccountSucceeded: Signal<Void>
@@ -94,7 +94,7 @@ public final class SettingViewModel: ViewModelType {
             .disposed(by: disposeBag)
 
         return Output(
-            displayName: displayNameRelay.asDriver(),
+            name: displayNameRelay.asDriver(),
             email: emailRelay.asDriver(),
             logoutSucceeded: logoutSucceededRelay.asSignal(),
             deleteAccountSucceeded: deleteAccountSucceededRelay.asSignal(),

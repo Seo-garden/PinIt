@@ -17,7 +17,7 @@ public final class SettingViewController: BaseViewController<SettingViewModel> {
     private let logoutTapRelay = PublishRelay<Void>()
     private let deleteAccountTapRelay = PublishRelay<Void>()
 
-    private var displayName: String = "User"
+    private var name: String = "User"
     private var email: String = ""
 
     public init(viewModel: SettingViewModel, onLogout: (() -> Void)? = nil) {
@@ -63,10 +63,10 @@ public final class SettingViewController: BaseViewController<SettingViewModel> {
 
         let output = viewModel.transform(input: input)
 
-        Driver.combineLatest(output.displayName, output.email)
+        Driver.combineLatest(output.name, output.email)
             .drive(onNext: { [weak self] name, email in
                 guard let self else { return }
-                self.displayName = name
+                self.name = name
                 self.email = email
                 self.settingView.tableView.reloadData()
             })
@@ -135,7 +135,7 @@ extension SettingViewController: UITableViewDataSource {
                 withIdentifier: SettingProfileCell.reuseIdentifier,
                 for: indexPath
             ) as? SettingProfileCell else { return UITableViewCell() }
-            cell.nameLabel.text = displayName
+            cell.nameLabel.text = name
             cell.emailLabel.text = email
             return cell
 
