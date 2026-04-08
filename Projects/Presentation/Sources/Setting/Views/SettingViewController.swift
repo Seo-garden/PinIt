@@ -63,17 +63,10 @@ public final class SettingViewController: BaseViewController<SettingViewModel> {
 
         let output = viewModel.transform(input: input)
 
-        output.displayName
-            .drive(onNext: { [weak self] name in
+        Driver.combineLatest(output.displayName, output.email)
+            .drive(onNext: { [weak self] name, email in
                 guard let self else { return }
                 self.displayName = name
-                self.settingView.tableView.reloadData()
-            })
-            .disposed(by: disposeBag)
-
-        output.email
-            .drive(onNext: { [weak self] email in
-                guard let self else { return }
                 self.email = email
                 self.settingView.tableView.reloadData()
             })
