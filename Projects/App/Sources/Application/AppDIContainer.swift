@@ -66,7 +66,7 @@ final class AppDIContainer {
         return TabBarViewController(
             mapViewController: makeMapViewController(),
             feedViewController: makeFeedViewController(),
-            createRecordViewController: makeCreateRecordViewController(),
+            makeCreateRecordViewController: makeCreateRecordViewController,
             settingViewController: makeSettingViewController(onLogout: onLogout)
         )
     }

@@ -8,15 +8,15 @@
 import UIKit
 
 public final class TabBarViewController: UITabBarController {
-    private let createRecordViewController: CreateRecordViewController
+    private let makeCreateRecordViewController: () -> CreateRecordViewController
 
     public init(
         mapViewController: MapViewController,
         feedViewController: FeedViewController,
-        createRecordViewController: CreateRecordViewController,
+        makeCreateRecordViewController: @escaping () -> CreateRecordViewController,
         settingViewController: SettingViewController
     ) {
-        self.createRecordViewController = createRecordViewController
+        self.makeCreateRecordViewController = makeCreateRecordViewController
         super.init(nibName: nil, bundle: nil)
 
         let mapNav = UINavigationController(rootViewController: mapViewController)
@@ -44,7 +44,7 @@ public final class TabBarViewController: UITabBarController {
 extension TabBarViewController: UITabBarControllerDelegate {
     public func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
         guard viewController == viewControllers?[1] else { return true }
-        let nav = UINavigationController(rootViewController: createRecordViewController)
+        let nav = UINavigationController(rootViewController: makeCreateRecordViewController())
         nav.view.backgroundColor = .systemBackground
         nav.modalPresentationStyle = .fullScreen
         present(nav, animated: true)
