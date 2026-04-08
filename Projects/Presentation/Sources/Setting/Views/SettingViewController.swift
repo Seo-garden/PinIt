@@ -181,7 +181,6 @@ extension SettingViewController: UITableViewDataSource {
             var config = cell.defaultContentConfiguration()
             config.text = AppStrings.Setting.logout
             config.textProperties.alignment = .center
-            config.textProperties.color = UIColor(red: 55/255, green: 48/255, blue: 107/255, alpha: 1)
             config.textProperties.font = .systemFont(ofSize: 16, weight: .semibold)
             cell.contentConfiguration = config
             cell.accessoryType = .none
