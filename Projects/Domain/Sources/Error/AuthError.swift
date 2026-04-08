@@ -1,5 +1,5 @@
 //
-//  AuthManagerRepositoryError.swift
+//  AuthError.swift
 //  Domain
 //
 //  Created by 서정원 on 4/6/26.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum AuthManagerRepositoryError: LocalizedError {
+public enum AuthError: LocalizedError {
     case firebaseNotConfigured
     case missingUserEmail
     case wrongCredentials

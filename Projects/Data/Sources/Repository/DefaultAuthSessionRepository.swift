@@ -19,4 +19,14 @@ public struct DefaultAuthSessionRepository: AuthSessionRepository {
 
         return Auth.auth().currentUser != nil
     }
+
+    public func currentUserEmail() -> String? {
+        guard FirebaseBootstrap.configureIfNeeded() else { return nil }
+        return Auth.auth().currentUser?.email
+    }
+
+    public func currentUserDisplayName() -> String? {
+        guard FirebaseBootstrap.configureIfNeeded() else { return nil }
+        return Auth.auth().currentUser?.displayName
+    }
 }

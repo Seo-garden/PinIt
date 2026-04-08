@@ -13,21 +13,25 @@ public final class TabBarViewController: UITabBarController {
     public init(
         mapViewController: MapViewController,
         feedViewController: FeedViewController,
-        createRecordViewController: CreateRecordViewController
+        createRecordViewController: CreateRecordViewController,
+        settingViewController: SettingViewController
     ) {
         self.createRecordViewController = createRecordViewController
         super.init(nibName: nil, bundle: nil)
 
         let mapNav = UINavigationController(rootViewController: mapViewController)
         mapNav.tabBarItem = UITabBarItem(title: "지도", image: UIImage(systemName: "map"), tag: 0)
-        
+
         let placeholderVC = UIViewController()
         placeholderVC.tabBarItem = UITabBarItem(title: "기록", image: UIImage(systemName: "plus.circle"), tag: 1)
 
         let feedNav = UINavigationController(rootViewController: feedViewController)
         feedNav.tabBarItem = UITabBarItem(title: "피드", image: UIImage(systemName: "list.bullet"), tag: 2)
 
-        self.viewControllers = [mapNav, placeholderVC, feedNav]
+        let settingNav = UINavigationController(rootViewController: settingViewController)
+        settingNav.tabBarItem = UITabBarItem(title: "설정", image: UIImage(systemName: "gearshape"), tag: 3)
+
+        self.viewControllers = [mapNav, placeholderVC, feedNav, settingNav]
         self.delegate = self
     }
 
