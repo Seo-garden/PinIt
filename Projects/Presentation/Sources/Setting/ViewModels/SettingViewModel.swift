@@ -65,11 +65,13 @@ public final class SettingViewModel: ViewModelType {
             .emit(onNext: { [weak self] in
                 guard let self else { return }
                 self.signOutUseCase.execute { result in
-                    switch result {
-                    case .success:
-                        logoutSucceededRelay.accept(())
-                    case .failure:
-                        errorMessageRelay.accept("로그아웃에 실패했습니다. 다시 시도해주세요.")
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success:
+                            logoutSucceededRelay.accept(())
+                        case .failure:
+                            errorMessageRelay.accept("로그아웃에 실패했습니다. 다시 시도해주세요.")
+                        }
                     }
                 }
             })
@@ -79,11 +81,13 @@ public final class SettingViewModel: ViewModelType {
             .emit(onNext: { [weak self] in
                 guard let self else { return }
                 self.deleteAccountUseCase.execute { result in
-                    switch result {
-                    case .success:
-                        deleteAccountSucceededRelay.accept(())
-                    case .failure:
-                        errorMessageRelay.accept("회원탈퇴에 실패했습니다. 다시 시도해주세요.")
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success:
+                            deleteAccountSucceededRelay.accept(())
+                        case .failure:
+                            errorMessageRelay.accept("회원탈퇴에 실패했습니다. 다시 시도해주세요.")
+                        }
                     }
                 }
             })
