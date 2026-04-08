@@ -76,7 +76,7 @@ public final class CreateRecordViewModel: ViewModelType {
 
         public var isRecordEnabled: Bool {
             let trimmed = form.caption.trimmingCharacters(in: .whitespacesAndNewlines)
-            return hasPhotos && !trimmed.isEmpty
+            return hasPhotos && !trimmed.isEmpty && location.locationName != nil
         }
     }
 
@@ -252,15 +252,20 @@ public final class CreateRecordViewModel: ViewModelType {
             .withLatestFrom(state)
             .filter { s in
                 let trimmed = RecordCaptionValidator.trimmed(s.form.caption)
-                return !s.photo.photos.isEmpty && RecordCaptionValidator.isValid(trimmed)
+                return !s.photo.photos.isEmpty
+                    && RecordCaptionValidator.isValid(trimmed)
+                    && s.location.coordinate != nil
+                    && s.location.locationName != nil
             }
             .flatMapLatest { [weak self] s -> Observable<Event<Record>> in
-                guard let self else { return .empty() }
+                guard let self,
+                      let coordinate = s.location.coordinate,
+                      let locationName = s.location.locationName else { return .empty() }
                 let draft = RecordDraft(
                     photoDataList: s.photo.photos,
                     caption: RecordCaptionValidator.trimmed(s.form.caption),
-                    locationName: s.location.locationName,
-                    coordinate: s.location.coordinate
+                    locationName: locationName,
+                    coordinate: coordinate
                 )
                 return Observable.create { observer in
                     self.saveRecordUseCase.execute(draft: draft) { result in

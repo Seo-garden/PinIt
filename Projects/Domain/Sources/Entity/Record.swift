@@ -11,16 +11,16 @@ public struct Record: Equatable {
     public let id: String
     public let photoDataList: [PhotoData]
     public var caption: String
-    public let locationName: String?
-    public let coordinate: Coordinate?
+    public let locationName: String
+    public let coordinate: Coordinate
     public let createdAt: Date
 
     public init(
         id: String,
         photoDataList: [PhotoData],
         caption: String,
-        locationName: String?,
-        coordinate: Coordinate?,
+        locationName: String,
+        coordinate: Coordinate,
         createdAt: Date
     ) {
         self.id = id
