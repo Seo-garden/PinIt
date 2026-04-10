@@ -8,17 +8,20 @@
 import Domain
 import PhotosUI
 import UIKit
+import UniformTypeIdentifiers
 
 public final class PhotoPickerAdapter: NSObject, PhotoPickerAdaptable {
     private let loadPhotoFromCameraUseCase: LoadPhotoFromCameraUseCase
     private let loadPhotoFromGalleryUseCase: LoadPhotoFromGalleryUseCase
+    private let loadPhotoFromImageDataUseCase: LoadPhotoFromImageDataUseCase
     private let fetchUserLocationUseCase: FetchUserLocationUseCase
     private var completion: ((Result<[PhotoData], PhotoError>) -> Void)?
     private var fallbackCoordinate: Coordinate?
 
-    public init(loadPhotoFromCameraUseCase: LoadPhotoFromCameraUseCase, loadPhotoFromGalleryUseCase: LoadPhotoFromGalleryUseCase, fetchUserLocationUseCase: FetchUserLocationUseCase) {
+    public init(loadPhotoFromCameraUseCase: LoadPhotoFromCameraUseCase, loadPhotoFromGalleryUseCase: LoadPhotoFromGalleryUseCase, loadPhotoFromImageDataUseCase: LoadPhotoFromImageDataUseCase, fetchUserLocationUseCase: FetchUserLocationUseCase) {
         self.loadPhotoFromCameraUseCase = loadPhotoFromCameraUseCase
         self.loadPhotoFromGalleryUseCase = loadPhotoFromGalleryUseCase
+        self.loadPhotoFromImageDataUseCase = loadPhotoFromImageDataUseCase
         self.fetchUserLocationUseCase = fetchUserLocationUseCase
         super.init()
     }
@@ -118,31 +121,34 @@ extension PhotoPickerAdapter: PHPickerViewControllerDelegate {
     }
 
     private func loadViaItemProviders(results: [PHPickerResult]) {
+        print("debug: [PhotoPicker] fallback path triggered, result = \(results.count)")
+        let typeIdentifier = UTType.image.identifier
         let group = DispatchGroup()
-        var collected: [PhotoData] = []
+        var collected: [Data] = []
         let syncQueue = DispatchQueue(label: "photo.picker.fallback.queue")
 
         for result in results {
-            guard result.itemProvider.canLoadObject(ofClass: UIImage.self) else { continue }
+            guard result.itemProvider.hasItemConformingToTypeIdentifier(typeIdentifier) else { continue }
             group.enter()
-            result.itemProvider.loadObject(ofClass: UIImage.self) { object, _ in
+            result.itemProvider.loadDataRepresentation(forTypeIdentifier: typeIdentifier) { data, _ in
                 defer { group.leave() }
-                guard let image = object as? UIImage else { return }
-                guard let data = image.jpegData(compressionQuality: 1.0) else { return }
-                let photo = PhotoData(imageData: data, coordinate: nil)
-                syncQueue.async { collected.append(photo) }
+                guard let data = data else { return }
+                syncQueue.async { collected.append(data) }
             }
         }
 
         group.notify(queue: .main) { [weak self] in
             guard let self else { return }
             syncQueue.sync {}
-            if collected.isEmpty {
+            guard !collected.isEmpty else {
                 self.completion?(.failure(.loadFailed))
-            } else {
-                self.completion?(.success(collected))
+                self.completion = nil
+                return
             }
-            self.completion = nil
+            self.loadPhotoFromImageDataUseCase.execute(items: collected) { [weak self] result in
+                self?.completion?(result)
+                self?.completion = nil
+            }
         }
     }
 }

@@ -64,4 +64,12 @@ public struct DefaultPhotoRepository: PhotoRepository {
             }
         }
     }
+
+    public func loadFromImageData(_ items: [Data], completion: @escaping (Result<[PhotoData], PhotoError>) -> Void) {
+        let photos = items.map { data -> PhotoData in
+            let coordinateDTO = EXIFCoordinateExtractor.extractCoordinate(fromData: data)
+            return PhotoDataDTO(imageData: data, coordinate: coordinateDTO).toDomain()
+        }
+        completion(.success(photos))
+    }
 }

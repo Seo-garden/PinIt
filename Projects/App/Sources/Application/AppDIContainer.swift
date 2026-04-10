@@ -35,13 +35,14 @@ final class AppDIContainer {
     private lazy var signInUseCase: SignInUseCase = DefaultSignInUseCase(authRepository: authRepository)
     private lazy var loadPhotoFromCameraUseCase: LoadPhotoFromCameraUseCase = DefaultLoadPhotoFromCameraUseCase(repository: photoRepository)
     private lazy var loadPhotoFromGalleryUseCase: LoadPhotoFromGalleryUseCase = DefaultLoadPhotoFromGalleryUseCase(repository: photoRepository)
+    private lazy var loadPhotoFromImageDataUseCase: LoadPhotoFromImageDataUseCase = DefaultLoadPhotoFromImageDataUseCase(repository: photoRepository)
     private lazy var signOutUseCase: SignOutUseCase = DefaultSignOutUseCase(authRepository: authRepository)
     private lazy var deleteAccountUseCase: DeleteAccountUseCase = DefaultDeleteAccountUseCase(authRepository: authRepository)
     private lazy var resetPasswordUseCase: ResetPasswordUseCase = DefaultResetPasswordUseCase(authRepository: authRepository)
     private lazy var fetchCurrentUserUseCase: FetchCurrentUserUseCase = DefaultFetchCurrentUserUseCase(authSessionRepository: authSessionRepository)
 
     // MARK: - Adapter
-    private lazy var photoPickerAdapter: PhotoPickerAdaptable = PhotoPickerAdapter(loadPhotoFromCameraUseCase: loadPhotoFromCameraUseCase, loadPhotoFromGalleryUseCase: loadPhotoFromGalleryUseCase, fetchUserLocationUseCase: fetchUserLocationUseCase)
+    private lazy var photoPickerAdapter: PhotoPickerAdaptable = PhotoPickerAdapter(loadPhotoFromCameraUseCase: loadPhotoFromCameraUseCase, loadPhotoFromGalleryUseCase: loadPhotoFromGalleryUseCase, loadPhotoFromImageDataUseCase: loadPhotoFromImageDataUseCase, fetchUserLocationUseCase: fetchUserLocationUseCase)
 
     // MARK: - Factory
     func makeOnboardingViewController(onFinished: @escaping () -> Void) -> OnboardingViewController {
