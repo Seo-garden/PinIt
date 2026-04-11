@@ -39,7 +39,7 @@ public struct DefaultPhotoRepository: PhotoRepository {
             options.version = .current
             PHImageManager.default().requestImageDataAndOrientation(for: asset, options: options) { data, _, _, info in
                 defer { group.leave() }
-                if let error = info?[PHImageErrorKey] as? Error {
+                if info?[PHImageErrorKey] is Error {
                     syncQueue.async { hasFailure = true }
                     return
                 }
@@ -69,6 +69,8 @@ public struct DefaultPhotoRepository: PhotoRepository {
             let coordinateDTO = EXIFCoordinateExtractor.extractCoordinate(fromData: data)
             return PhotoDataDTO(imageData: data, coordinate: coordinateDTO).toDomain()
         }
-        completion(.success(photos))
+        DispatchQueue.main.async {
+            completion(.success(photos))
+        }
     }
 }
