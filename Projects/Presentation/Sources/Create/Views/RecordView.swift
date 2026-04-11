@@ -201,6 +201,20 @@ final class RecordView: UIView {
         return button
     }()
 
+    let loadingOverlayView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.35)
+        view.isHidden = true
+        return view
+    }()
+
+    let loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .white
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+
     // MARK: - Init
 
     init(mode: RecordViewMode) {
@@ -254,6 +268,8 @@ final class RecordView: UIView {
         switch mode {
         case .create:
             addSubview(recordButton)
+            addSubview(loadingOverlayView)
+            loadingOverlayView.addSubview(loadingIndicator)
 
             photoContainerView.addSubview(deletePhotoButton)
             contentView.addSubview(actionStack)
@@ -267,6 +283,8 @@ final class RecordView: UIView {
 
             allViews += [
                 recordButton,
+                loadingOverlayView,
+                loadingIndicator,
                 deletePhotoButton,
                 actionStack,
                 chipsScrollView,
@@ -372,6 +390,14 @@ final class RecordView: UIView {
                 recordButton.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 20),
                 recordButton.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -20),
                 recordButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
+
+                loadingOverlayView.topAnchor.constraint(equalTo: topAnchor),
+                loadingOverlayView.leadingAnchor.constraint(equalTo: leadingAnchor),
+                loadingOverlayView.trailingAnchor.constraint(equalTo: trailingAnchor),
+                loadingOverlayView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+                loadingIndicator.centerXAnchor.constraint(equalTo: loadingOverlayView.centerXAnchor),
+                loadingIndicator.centerYAnchor.constraint(equalTo: loadingOverlayView.centerYAnchor),
             ]
 
         case .detail:

@@ -20,6 +20,7 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
     private let searchedLocationRelay = PublishRelay<(name: String, coordinate: Coordinate)>()
     private let recordView = RecordView(mode: .create)
     private var currentPhotos: [PhotoData] = []
+    private var isSaving: Bool = false
     
     private let closeButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: nil, action: nil)
 
@@ -110,6 +111,10 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
 
         output.state
             .drive(onNext: { [weak self] state in self?.apply(state: state) })
+            .disposed(by: disposeBag)
+
+        output.isSaving
+            .drive(onNext: { [weak self] saving in self?.applyIsSaving(saving) })
             .disposed(by: disposeBag)
 
         output.requestCamera
@@ -229,8 +234,30 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
         }
 
         if photoChanged || formChanged {
-            recordView.recordButton.isEnabled = state.isRecordEnabled
-            recordView.recordButton.alpha = state.isRecordEnabled ? 1.0 : 0.5
+            let enabled = state.isRecordEnabled && !isSaving
+            recordView.recordButton.isEnabled = enabled
+            recordView.recordButton.alpha = enabled ? 1.0 : 0.5
+        }
+    }
+
+    private func applyIsSaving(_ saving: Bool) {
+        isSaving = saving
+
+        if saving {
+            recordView.loadingOverlayView.isHidden = false
+            recordView.loadingIndicator.startAnimating()
+        } else {
+            recordView.loadingIndicator.stopAnimating()
+            recordView.loadingOverlayView.isHidden = true
+        }
+
+        closeButton.isEnabled = !saving
+        isModalInPresentation = saving
+
+        if let state = previousState {
+            let enabled = state.isRecordEnabled && !saving
+            recordView.recordButton.isEnabled = enabled
+            recordView.recordButton.alpha = enabled ? 1.0 : 0.5
         }
     }
 

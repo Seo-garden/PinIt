@@ -163,6 +163,7 @@ public final class CreateRecordViewModel: ViewModelType {
 
     public struct Output {
         public let state: Driver<State>
+        public let isSaving: Driver<Bool>
         public let requestCamera: Signal<Void>
         public let requestGallery: Signal<Int>
         public let showAlert: Signal<AlertMessage>
@@ -172,6 +173,7 @@ public final class CreateRecordViewModel: ViewModelType {
 
     public func transform(input: Input) -> Output {
         let state = BehaviorRelay<State>(value: State())
+        let isSaving = BehaviorRelay<Bool>(value: false)
 
         let requestCamera = input.takePhotoTap.asObservable()
             .withLatestFrom(state)
@@ -252,7 +254,9 @@ public final class CreateRecordViewModel: ViewModelType {
         let drivenState = state.asDriver()
 
         let saveResult = input.recordTap.asObservable()
-            .withLatestFrom(state)
+            .withLatestFrom(Observable.combineLatest(state.asObservable(), isSaving.asObservable()))
+            .filter { !$0.1 }
+            .map { $0.0 }
             .filter { s in
                 let trimmed = RecordCaptionValidator.trimmed(s.form.caption)
                 return !s.photo.photos.isEmpty
@@ -260,6 +264,7 @@ public final class CreateRecordViewModel: ViewModelType {
                     && s.location.coordinate != nil
                     && s.location.locationName != nil
             }
+            .do(onNext: { _ in isSaving.accept(true) })
             .flatMapLatest { [weak self] s -> Observable<Event<Record>> in
                 guard let self,
                       let coordinate = s.location.coordinate,
@@ -294,6 +299,11 @@ public final class CreateRecordViewModel: ViewModelType {
                     return Disposables.create()
                 }
             }
+            .do(
+                onNext: { _ in isSaving.accept(false) },
+                onError: { _ in isSaving.accept(false) },
+                onDispose: { isSaving.accept(false) }
+            )
             .share()
 
         let finish = saveResult
@@ -322,6 +332,7 @@ public final class CreateRecordViewModel: ViewModelType {
 
         return Output(
             state: drivenState,
+            isSaving: isSaving.asDriver(),
             requestCamera: requestCamera,
             requestGallery: requestGallery,
             showAlert: Signal.merge(overLimitAlert, saveError),
