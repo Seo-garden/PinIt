@@ -40,7 +40,6 @@ public struct DefaultPhotoRepository: PhotoRepository {
             PHImageManager.default().requestImageDataAndOrientation(for: asset, options: options) { data, _, _, info in
                 defer { group.leave() }
                 if let error = info?[PHImageErrorKey] as? Error {
-                    debugPrint("[PhotoRepository] asset load failed: \(error.localizedDescription)")
                     syncQueue.async { hasFailure = true }
                     return
                 }

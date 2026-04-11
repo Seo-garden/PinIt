@@ -121,7 +121,6 @@ extension PhotoPickerAdapter: PHPickerViewControllerDelegate {
     }
 
     private func loadViaItemProviders(results: [PHPickerResult]) {
-        print("debug: [PhotoPicker] fallback path triggered, result = \(results.count)")
         let typeIdentifier = UTType.image.identifier
         let group = DispatchGroup()
         var collected: [Data] = []
