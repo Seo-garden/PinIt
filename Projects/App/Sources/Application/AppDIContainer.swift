@@ -23,6 +23,9 @@ final class AppDIContainer {
     private lazy var onboardingContentRepository: OnboardingContentRepository = DefaultOnboardingContentRepository()
     private lazy var onboardingStatusRepository: OnboardingStatusRepository = DefaultOnboardingStatusRepository()
 
+    // MARK: - Encoder
+    private lazy var photoEncoder: PhotoEncoder = DefaultPhotoEncoder()
+
     // MARK: - UseCase
     private lazy var reverseGeocodeUseCase: ReverseGeocodeUseCase = DefaultReverseGeocodeUseCase(repository: geocodingRepository)
     private lazy var locationSuggestionUseCase: LocationSuggestionUseCase = DefaultLocationSuggestionUseCase(reverseGeocodeUseCase: reverseGeocodeUseCase)
@@ -36,6 +39,7 @@ final class AppDIContainer {
     private lazy var loadPhotoFromCameraUseCase: LoadPhotoFromCameraUseCase = DefaultLoadPhotoFromCameraUseCase(repository: photoRepository)
     private lazy var loadPhotoFromGalleryUseCase: LoadPhotoFromGalleryUseCase = DefaultLoadPhotoFromGalleryUseCase(repository: photoRepository)
     private lazy var loadPhotoFromImageDataUseCase: LoadPhotoFromImageDataUseCase = DefaultLoadPhotoFromImageDataUseCase(repository: photoRepository)
+    private lazy var encodePhotosUseCase: EncodePhotosUseCase = DefaultEncodePhotosUseCase(encoder: photoEncoder)
     private lazy var signOutUseCase: SignOutUseCase = DefaultSignOutUseCase(authRepository: authRepository)
     private lazy var deleteAccountUseCase: DeleteAccountUseCase = DefaultDeleteAccountUseCase(authRepository: authRepository)
     private lazy var resetPasswordUseCase: ResetPasswordUseCase = DefaultResetPasswordUseCase(authRepository: authRepository)
@@ -87,7 +91,8 @@ final class AppDIContainer {
     private func makeCreateRecordViewController() -> CreateRecordViewController {
         let viewModel = CreateRecordViewModel(
             locationSuggestionUseCase: locationSuggestionUseCase,
-            saveRecordUseCase: saveRecordUseCase
+            saveRecordUseCase: saveRecordUseCase,
+            encodePhotosUseCase: encodePhotosUseCase
         )
         let coordinator = CreateRecordCoordinator(photoAdapter: photoPickerAdapter, searchLocationUseCase: searchLocationUseCase)
         return CreateRecordViewController(

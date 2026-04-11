@@ -15,14 +15,17 @@ public final class CreateRecordViewModel: ViewModelType {
     public static let maxPhotos = 5
     private let locationSuggestionUseCase: LocationSuggestionUseCase
     private let saveRecordUseCase: SaveRecordUseCase
+    private let encodePhotosUseCase: EncodePhotosUseCase
     private var disposeBag = DisposeBag()
 
     public init(
         locationSuggestionUseCase: LocationSuggestionUseCase,
-        saveRecordUseCase: SaveRecordUseCase
+        saveRecordUseCase: SaveRecordUseCase,
+        encodePhotosUseCase: EncodePhotosUseCase
     ) {
         self.locationSuggestionUseCase = locationSuggestionUseCase
         self.saveRecordUseCase = saveRecordUseCase
+        self.encodePhotosUseCase = encodePhotosUseCase
     }
 
     public struct PhotoState: Equatable {
@@ -261,21 +264,31 @@ public final class CreateRecordViewModel: ViewModelType {
                 guard let self,
                       let coordinate = s.location.coordinate,
                       let locationName = s.location.locationName else { return .empty() }
-                let draft = RecordDraft(
-                    photoDataList: s.photo.photos,
-                    caption: RecordCaptionValidator.trimmed(s.form.caption),
-                    locationName: locationName,
-                    coordinate: coordinate
-                )
-                return Observable.create { observer in
-                    self.saveRecordUseCase.execute(draft: draft) { result in
-                        switch result {
-                        case .success(let record):
-                            observer.onNext(.next(record))
+                return Observable.create { [weak self] observer in
+                    guard let self else {
+                        observer.onCompleted()
+                        return Disposables.create()
+                    }
+                    self.encodePhotosUseCase.execute(photos: s.photo.photos) { [weak self] encodedPhotos in
+                        guard let self else {
                             observer.onCompleted()
-                        case .failure(let error):
-                            observer.onNext(.error(error))
-                            observer.onCompleted()
+                            return
+                        }
+                        let draft = RecordDraft(
+                            photoDataList: encodedPhotos,
+                            caption: RecordCaptionValidator.trimmed(s.form.caption),
+                            locationName: locationName,
+                            coordinate: coordinate
+                        )
+                        self.saveRecordUseCase.execute(draft: draft) { result in
+                            switch result {
+                            case .success(let record):
+                                observer.onNext(.next(record))
+                                observer.onCompleted()
+                            case .failure(let error):
+                                observer.onNext(.error(error))
+                                observer.onCompleted()
+                            }
                         }
                     }
                     return Disposables.create()
