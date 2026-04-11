@@ -69,13 +69,19 @@ extension PhotoPickerAdapter: UIImagePickerControllerDelegate, UINavigationContr
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true) { [weak self] in
             guard let self else { return }
-            guard let image = info[.originalImage] as? UIImage,
-                  let imageData = image.jpegData(compressionQuality: 1.0) else {
+
+            let imageData: Data
+            if let url = info[.imageURL] as? URL, let originalData = try? Data(contentsOf: url) {
+                imageData = originalData
+            } else if let image = info[.originalImage] as? UIImage,
+                      let jpegData = image.jpegData(compressionQuality: 0.9) {
+                imageData = jpegData
+            } else {
                 self.completion?(.failure(.loadFailed))
                 self.completion = nil
                 return
             }
-            
+
             let metadata = info[.mediaMetadata] as? [AnyHashable: Any] ?? [:]
             let fallback = self.fallbackCoordinate
             self.loadPhotoFromCameraUseCase.execute(imageData: imageData, metadata: metadata) { [weak self] result in
