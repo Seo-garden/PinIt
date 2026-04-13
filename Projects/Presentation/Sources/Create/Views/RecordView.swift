@@ -96,7 +96,7 @@ final class RecordView: UIView {
     
     let takePhotoButton: UIButton = {
         var config = UIButton.Configuration.filled()
-        config.title = "Take Photo"
+        config.title = "촬영"
         config.image = UIImage(systemName: "camera")
         config.imagePadding = 8
         config.baseBackgroundColor = UIColor.systemBlue.withAlphaComponent(0.08)
@@ -105,10 +105,10 @@ final class RecordView: UIView {
         let button = UIButton(configuration: config)
         return button
     }()
-    
+
     let galleryButton: UIButton = {
         var config = UIButton.Configuration.filled()
-        config.title = "Gallery"
+        config.title = "앨범"
         config.image = UIImage(systemName: "photo.on.rectangle")
         config.imagePadding = 8
         config.baseBackgroundColor = UIColor.systemBlue.withAlphaComponent(0.08)
@@ -126,24 +126,19 @@ final class RecordView: UIView {
         return label
     }()
 
-    let captionTitleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "CAPTION"
-        label.font = .systemFont(ofSize: 13, weight: .semibold)
-        label.textColor = .secondaryLabel
-        return label
-    }()
-    
     let captionInputView = CaptionInputView(maxLength: RecordCaptionValidator.maxLength)
 
-    let locationTitleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "LOCATION DATA"
-        label.font = .systemFont(ofSize: 14, weight: .semibold)
-        label.textColor = .secondaryLabel
-        return label
+    static let maxLocationTitleLength = 30
+
+    let locationTitleTextField: UITextField = {
+        let field = UITextField()
+        field.placeholder = "제목을 입력하세요"
+        field.font = .systemFont(ofSize: 16)
+        field.borderStyle = .roundedRect
+        field.clearButtonMode = .whileEditing
+        return field
     }()
-    
+
     let locationField = LocationFieldView()
 
     private let chipsScrollView: UIScrollView = {
@@ -236,9 +231,8 @@ final class RecordView: UIView {
         [
             photoContainerView,
             captionCountLabel,
-            captionTitleLabel,
             captionInputView,
-            locationTitleLabel,
+            locationTitleTextField,
             locationField,
             mapContainerView
         ].forEach { contentView.addSubview($0) }
@@ -257,9 +251,8 @@ final class RecordView: UIView {
             photoEmptyLabel,
             pageBadgeLabel,
             captionCountLabel,
-            captionTitleLabel,
             captionInputView,
-            locationTitleLabel,
+            locationTitleTextField,
             locationField,
             mapContainerView,
             mapView
@@ -293,11 +286,13 @@ final class RecordView: UIView {
 
         case .detail:
             locationField.isUserInteractionEnabled = false
+            locationTitleTextField.isEnabled = false
         }
 
         allViews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
 
         captionCountLabel.text = "0 / \(RecordCaptionValidator.maxLength)"
+        locationTitleTextField.delegate = self
     }
 
     private func setupLayout() {
@@ -309,7 +304,12 @@ final class RecordView: UIView {
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
 
-            photoContainerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            locationTitleTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            locationTitleTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            locationTitleTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            locationTitleTextField.heightAnchor.constraint(equalToConstant: 44),
+
+            photoContainerView.topAnchor.constraint(equalTo: locationTitleTextField.bottomAnchor, constant: 16),
             photoContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             photoContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             photoContainerView.heightAnchor.constraint(equalToConstant: 240),
@@ -329,15 +329,10 @@ final class RecordView: UIView {
             pageBadgeLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 64),
             pageBadgeLabel.heightAnchor.constraint(equalToConstant: 28),
 
-            captionInputView.topAnchor.constraint(equalTo: captionTitleLabel.bottomAnchor, constant: 8),
             captionInputView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             captionInputView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
 
-            locationTitleLabel.topAnchor.constraint(equalTo: captionInputView.bottomAnchor, constant: 24),
-            locationTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            locationTitleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-
-            locationField.topAnchor.constraint(equalTo: locationTitleLabel.bottomAnchor, constant: 8),
+            locationField.topAnchor.constraint(equalTo: captionInputView.bottomAnchor, constant: 24),
             locationField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             locationField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
 
@@ -367,13 +362,12 @@ final class RecordView: UIView {
                 actionStack.topAnchor.constraint(equalTo: photoContainerView.bottomAnchor, constant: 18),
                 actionStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
                 actionStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                actionStack.heightAnchor.constraint(equalToConstant: 44),
 
                 captionCountLabel.topAnchor.constraint(equalTo: actionStack.bottomAnchor, constant: 8),
-                captionCountLabel.centerXAnchor.constraint(equalTo: actionStack.trailingAnchor, constant: -20),
+                captionCountLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
 
-                captionTitleLabel.topAnchor.constraint(equalTo: actionStack.bottomAnchor, constant: 8),
-                captionTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-                captionTitleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                captionInputView.topAnchor.constraint(equalTo: captionCountLabel.bottomAnchor, constant: 4),
 
                 chipsScrollView.topAnchor.constraint(equalTo: locationField.bottomAnchor, constant: 12),
                 chipsScrollView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
@@ -390,6 +384,7 @@ final class RecordView: UIView {
                 recordButton.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 20),
                 recordButton.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -20),
                 recordButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
+                recordButton.heightAnchor.constraint(equalToConstant: 44),
 
                 loadingOverlayView.topAnchor.constraint(equalTo: topAnchor),
                 loadingOverlayView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -407,9 +402,7 @@ final class RecordView: UIView {
                 captionCountLabel.topAnchor.constraint(equalTo: photoContainerView.bottomAnchor, constant: 18),
                 captionCountLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
 
-                captionTitleLabel.topAnchor.constraint(equalTo: photoContainerView.bottomAnchor, constant: 18),
-                captionTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-                captionTitleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                captionInputView.topAnchor.constraint(equalTo: captionCountLabel.bottomAnchor, constant: 4),
 
                 mapContainerView.topAnchor.constraint(equalTo: locationField.bottomAnchor, constant: 16),
             ]
@@ -434,5 +427,16 @@ final class RecordView: UIView {
             }
         }
         chipsScrollView.isHidden = suggestions.isEmpty
+    }
+}
+
+// MARK: - UITextFieldDelegate
+
+extension RecordView: UITextFieldDelegate {
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard textField == locationTitleTextField else { return true }
+        guard let current = textField.text, let range = Range(range, in: current) else { return true }
+        let updated = current.replacingCharacters(in: range, with: string)
+        return updated.count <= Self.maxLocationTitleLength
     }
 }

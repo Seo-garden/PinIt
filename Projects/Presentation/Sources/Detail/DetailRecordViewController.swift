@@ -177,6 +177,8 @@ public final class DetailRecordViewController: BaseViewController<DetailRecordVi
         }
 
         if locationChanged {
+            recordView.locationTitleTextField.text = state.location.locationTitle
+
             recordView.locationField.configure(
                 text: state.location.locationName,
                 showsClear: false

@@ -19,6 +19,7 @@ public final class InMemoryRecordRepository: RecordRepository {
             id: UUID().uuidString,
             photoDataList: draft.photoDataList,
             caption: draft.caption,
+            locationTitle: draft.locationTitle,
             locationName: draft.locationName,
             coordinate: draft.coordinate,
             createdAt: Date()

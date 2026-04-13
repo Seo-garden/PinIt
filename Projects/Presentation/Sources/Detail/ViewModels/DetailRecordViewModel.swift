@@ -40,6 +40,7 @@ public final class DetailRecordViewModel: ViewModelType {
     }
 
     public struct LocationState: Equatable {
+        public var locationTitle: String?
         public var locationName: String?
         public var coordinate: Coordinate?
     }
@@ -111,6 +112,7 @@ public final class DetailRecordViewModel: ViewModelType {
                 originalCaption: record.caption
             ),
             location: LocationState(
+                locationTitle: record.locationTitle,
                 locationName: record.locationName,
                 coordinate: record.coordinate
             )
