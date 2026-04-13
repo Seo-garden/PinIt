@@ -15,6 +15,11 @@ public final class DetailRecordCoordinator {
         controller.present(alert, animated: true)
     }
 
+    func presentPhotoDetail(from controller: UIViewController, images: [UIImage], initialPage: Int) {
+        let photoDetailVC = PhotoDetailViewController(images: images, initialPage: initialPage)
+        controller.present(photoDetailVC, animated: true)
+    }
+
     func showDeleteConfirmation(from controller: UIViewController, onConfirm: @escaping () -> Void) {
         let alert = UIAlertController(
             title: AppStrings.Detail.deleteTitle,
