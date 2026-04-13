@@ -234,7 +234,7 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
             recordView.mapView.setRegion(region, animated: shouldAnimate)
         }
 
-        if photoChanged || formChanged {
+        if photoChanged || formChanged || locationChanged {
             let enabled = state.isRecordEnabled && !isSaving
             recordView.recordButton.isEnabled = enabled
             recordView.recordButton.alpha = enabled ? 1.0 : 0.5

@@ -29,7 +29,7 @@ final class CaptionInputView: UIView {
     
     private let placeholderLabel: UILabel = {
         let label = UILabel()
-        label.text = "기록을 표현하는 한 문장을 작성해보세요!"
+        label.text = " 기록을 표현하는 한 문장을 작성해보세요!"
         label.font = .systemFont(ofSize: 16)
         label.textColor = .tertiaryLabel
         label.numberOfLines = 0

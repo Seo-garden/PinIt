@@ -89,7 +89,8 @@ extension FeedViewController: UITableViewDataSource, UITableViewDelegate {
         content.text = record.caption.isEmpty ? "(캡션 없음)" : record.caption
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy.MM.dd HH:mm"
-        content.secondaryText = "\(formatter.string(from: record.createdAt))  ·  사진 \(record.photoDataList.count)장"
+        let coordinate = "(\(String(format: "%.4f", record.coordinate.latitude)), \(String(format: "%.4f", record.coordinate.longitude)))"
+        content.secondaryText = "\(formatter.string(from: record.createdAt))  ·  사진 \(record.photoDataList.count)장  ·  \(coordinate)"
         cell.contentConfiguration = content
         cell.accessoryType = .disclosureIndicator
         return cell
