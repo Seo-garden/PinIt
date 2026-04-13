@@ -305,6 +305,12 @@ extension CreateRecordViewController: UICollectionViewDataSource, UICollectionVi
         return cell
     }
 
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let images = currentPhotos.compactMap { UIImage(data: $0.imageData) }
+        guard !images.isEmpty else { return }
+        coordinator.presentPhotoDetail(from: self, images: images, initialPage: indexPath.item)
+    }
+
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let page = Int(scrollView.contentOffset.x / max(scrollView.bounds.width, 1))
         currentPageRelay.accept(page)
