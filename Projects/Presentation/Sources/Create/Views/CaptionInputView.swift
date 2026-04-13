@@ -19,7 +19,7 @@ final class CaptionInputView: UIView {
         textView.font = .systemFont(ofSize: 16)
         textView.backgroundColor = .secondarySystemBackground
         textView.layer.cornerRadius = 18
-        textView.textContainerInset = UIEdgeInsets(top: 14, left: 14, bottom: 32, right: 14)
+        textView.textContainerInset = UIEdgeInsets(top: 14, left: 14, bottom: 14, right: 14)
         textView.isScrollEnabled = true
         textView.alwaysBounceVertical = true
         textView.showsVerticalScrollIndicator = true
@@ -36,13 +36,6 @@ final class CaptionInputView: UIView {
         return label
     }()
     
-    private let countLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 13)
-        label.textColor = .secondaryLabel
-        label.textAlignment = .right
-        return label
-    }()
 
     init(maxLength: Int) {
         self.maxLength = maxLength
@@ -60,8 +53,7 @@ final class CaptionInputView: UIView {
     private func setupUI() {
         addSubview(textView)
         textView.addSubview(placeholderLabel)
-        textView.addSubview(countLabel)
-        [textView, placeholderLabel, countLabel].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
+        [textView, placeholderLabel].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         textView.delegate = self
     }
 
@@ -76,9 +68,6 @@ final class CaptionInputView: UIView {
             placeholderLabel.topAnchor.constraint(equalTo: textView.topAnchor, constant: 12),
             placeholderLabel.leadingAnchor.constraint(equalTo: textView.leadingAnchor, constant: 14),
             placeholderLabel.trailingAnchor.constraint(equalTo: textView.trailingAnchor, constant: -14),
-
-            countLabel.trailingAnchor.constraint(equalTo: textView.trailingAnchor, constant: -14),
-            countLabel.bottomAnchor.constraint(equalTo: textView.bottomAnchor, constant: -10)
         ])
     }
 
@@ -98,7 +87,6 @@ final class CaptionInputView: UIView {
 
     private func updateCount(text: String) {
         placeholderLabel.isHidden = !text.isEmpty
-        countLabel.text = "\(text.count) / \(maxLength)"
     }
 }
 

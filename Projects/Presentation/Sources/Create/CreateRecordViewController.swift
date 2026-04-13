@@ -87,6 +87,7 @@ public final class CreateRecordViewController: BaseViewController<CreateRecordVi
             deleteCurrentPhoto: recordView.deletePhotoButton.rx.tap.asSignal(),
             captionChanged: recordView.captionInputView.textChanges().asSignal(onErrorJustReturn: ""),
             currentPageChanged: currentPageRelay.asSignal(onErrorSignalWith: .empty()),
+            locationTitleChanged: recordView.locationTitleTextField.rx.text.orEmpty.changed.asSignal(onErrorJustReturn: ""),
             clearLocationTap: recordView.locationField.clear,
             selectSuggestedLocation: selectSuggestedLocationRelay.asSignal(onErrorSignalWith: .empty()),
             searchedLocation: searchedLocationRelay.asSignal(onErrorSignalWith: .empty()),

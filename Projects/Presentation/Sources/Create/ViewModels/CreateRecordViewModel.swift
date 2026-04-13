@@ -35,6 +35,7 @@ public final class CreateRecordViewModel: ViewModelType {
 
     public struct FormState: Equatable {
         public var caption: String = ""
+        public var locationTitle: String = ""
     }
 
     public struct LocationState: Equatable {
@@ -89,6 +90,7 @@ public final class CreateRecordViewModel: ViewModelType {
         case setPhotos([PhotoData])
         case deletePhoto(Int)
         case setCaption(String)
+        case setLocationTitle(String)
         case setPage(Int)
         case setLocation(Coordinate?, String?)
         case setSearchedLocation(Coordinate, String)
@@ -110,6 +112,8 @@ public final class CreateRecordViewModel: ViewModelType {
             }
         case .setCaption(let caption):
             newState.form.caption = caption
+        case .setLocationTitle(let title):
+            newState.form.locationTitle = title
         case .setPage(let page):
             newState.photo.currentPage = page
         case .setLocation(let coord, let name):
@@ -155,6 +159,7 @@ public final class CreateRecordViewModel: ViewModelType {
         public let deleteCurrentPhoto: Signal<Void>
         public let captionChanged: Signal<String>
         public let currentPageChanged: Signal<Int>
+        public let locationTitleChanged: Signal<String>
         public let clearLocationTap: Signal<Void>
         public let selectSuggestedLocation: Signal<Int>
         public let searchedLocation: Signal<(name: String, coordinate: Coordinate)>
@@ -213,6 +218,9 @@ public final class CreateRecordViewModel: ViewModelType {
         let setPageMutation = input.currentPageChanged.asObservable()
             .map { Mutation.setPage($0) }
 
+        let setLocationTitleMutation = input.locationTitleChanged.asObservable()
+            .map { Mutation.setLocationTitle($0) }
+
         let clearLocationMutation = input.clearLocationTap.asObservable()
             .map { Mutation.setLocation(nil, nil) }
 
@@ -240,6 +248,7 @@ public final class CreateRecordViewModel: ViewModelType {
             setPhotosMutation,
             deletePhotoMutation,
             setCaptionMutation,
+            setLocationTitleMutation,
             setPageMutation,
             clearLocationMutation,
             applySuggestionMutation,
@@ -282,6 +291,7 @@ public final class CreateRecordViewModel: ViewModelType {
                         let draft = RecordDraft(
                             photoDataList: encodedPhotos,
                             caption: RecordCaptionValidator.trimmed(s.form.caption),
+                            locationTitle: s.form.locationTitle.trimmingCharacters(in: .whitespacesAndNewlines),
                             locationName: locationName,
                             coordinate: coordinate
                         )
