@@ -18,6 +18,7 @@ final class CaptionInputView: UIView {
         let textView = UITextView()
         textView.font = .systemFont(ofSize: 16)
         textView.backgroundColor = .secondarySystemBackground
+        textView.textContainer.lineFragmentPadding = 0
         textView.layer.cornerRadius = 18
         textView.textContainerInset = UIEdgeInsets(top: 14, left: 14, bottom: 14, right: 14)
         textView.isScrollEnabled = true
@@ -29,7 +30,7 @@ final class CaptionInputView: UIView {
     
     private let placeholderLabel: UILabel = {
         let label = UILabel()
-        label.text = " 기록을 표현하는 한 문장을 작성해보세요!"
+        label.text = "기록을 표현하는 한 문장을 작성해보세요!"
         label.font = .systemFont(ofSize: 16)
         label.textColor = .tertiaryLabel
         label.numberOfLines = 0

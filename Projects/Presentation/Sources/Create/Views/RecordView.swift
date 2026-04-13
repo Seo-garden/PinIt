@@ -103,7 +103,6 @@ final class RecordView: UIView {
         config.baseForegroundColor = .systemBlue
         config.cornerStyle = .large
         let button = UIButton(configuration: config)
-        button.heightAnchor.constraint(equalToConstant: 44).isActive = true
         return button
     }()
 
@@ -116,7 +115,6 @@ final class RecordView: UIView {
         config.baseForegroundColor = .systemBlue
         config.cornerStyle = .large
         let button = UIButton(configuration: config)
-        button.heightAnchor.constraint(equalToConstant: 44).isActive = true
         return button
     }()
 
@@ -195,7 +193,6 @@ final class RecordView: UIView {
         config.baseForegroundColor = .white
         config.cornerStyle = .large
         let button = UIButton(configuration: config)
-        button.heightAnchor.constraint(equalToConstant: 44).isActive = true
         return button
     }()
 
@@ -365,6 +362,7 @@ final class RecordView: UIView {
                 actionStack.topAnchor.constraint(equalTo: photoContainerView.bottomAnchor, constant: 18),
                 actionStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
                 actionStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                actionStack.heightAnchor.constraint(equalToConstant: 44),
 
                 captionCountLabel.topAnchor.constraint(equalTo: actionStack.bottomAnchor, constant: 8),
                 captionCountLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
@@ -386,6 +384,7 @@ final class RecordView: UIView {
                 recordButton.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 20),
                 recordButton.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -20),
                 recordButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
+                recordButton.heightAnchor.constraint(equalToConstant: 44),
 
                 loadingOverlayView.topAnchor.constraint(equalTo: topAnchor),
                 loadingOverlayView.leadingAnchor.constraint(equalTo: leadingAnchor),
