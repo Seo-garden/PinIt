@@ -129,28 +129,28 @@ extension PhotoPickerAdapter: PHPickerViewControllerDelegate {
     private func loadViaItemProviders(results: [PHPickerResult]) {
         let typeIdentifier = UTType.image.identifier
         let group = DispatchGroup()
-        var collected: [Data] = []
+        var collected = [Data?](repeating: nil, count: results.count)
         let syncQueue = DispatchQueue(label: "photo.picker.fallback.queue")
 
-        for result in results {
+        for (index, result) in results.enumerated() {
             guard result.itemProvider.hasItemConformingToTypeIdentifier(typeIdentifier) else { continue }
             group.enter()
             result.itemProvider.loadDataRepresentation(forTypeIdentifier: typeIdentifier) { data, _ in
                 defer { group.leave() }
-                guard let data = data else { return }
-                syncQueue.async { collected.append(data) }
+                guard let data else { return }
+                syncQueue.async { collected[index] = data }
             }
         }
 
         group.notify(queue: .main) { [weak self] in
             guard let self else { return }
-            syncQueue.sync {}
-            guard !collected.isEmpty else {
+            let ordered = syncQueue.sync { collected.compactMap { $0 } }
+            guard !ordered.isEmpty else {
                 self.completion?(.failure(.loadFailed))
                 self.completion = nil
                 return
             }
-            self.loadPhotoFromImageDataUseCase.execute(items: collected) { [weak self] result in
+            self.loadPhotoFromImageDataUseCase.execute(items: ordered) { [weak self] result in
                 self?.completion?(result)
                 self?.completion = nil
             }

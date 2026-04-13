@@ -21,18 +21,24 @@ public struct DefaultPhotoRepository: PhotoRepository {
     }
 
     public func loadFromGallery(assetIdentifiers: [String], completion: @escaping (Result<[PhotoData], PhotoError>) -> Void) {
-        let assets = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
-        guard assets.count > 0 else {
+        let fetchResult = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
+        guard fetchResult.count > 0 else {
             completion(.success([]))
             return
         }
 
+        var assetsByIdentifier: [String: PHAsset] = [:]
+        fetchResult.enumerateObjects { asset, _, _ in
+            assetsByIdentifier[asset.localIdentifier] = asset
+        }
+        let orderedAssets = assetIdentifiers.compactMap { assetsByIdentifier[$0] }
+
         let group = DispatchGroup()
-        var collected: [PhotoData] = []
+        var collected = [PhotoData?](repeating: nil, count: orderedAssets.count)
         var hasFailure = false
         let syncQueue = DispatchQueue(label: "photo.repository.queue")
 
-        assets.enumerateObjects { asset, _, _ in
+        for (index, asset) in orderedAssets.enumerated() {
             group.enter()
             let options = PHImageRequestOptions()
             options.isNetworkAccessAllowed = true
@@ -43,23 +49,23 @@ public struct DefaultPhotoRepository: PhotoRepository {
                     syncQueue.async { hasFailure = true }
                     return
                 }
-                guard let data = data else {
+                guard let data else {
                     syncQueue.async { hasFailure = true }
                     return
                 }
                 let coordinateDTO = EXIFCoordinateExtractor.extractCoordinate(fromData: data)
                     ?? asset.location.map { CoordinateDTO(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude) }
                 let photoDTO = PhotoDataDTO(imageData: data, coordinate: coordinateDTO)
-                syncQueue.async { collected.append(photoDTO.toDomain()) }
+                syncQueue.async { collected[index] = photoDTO.toDomain() }
             }
         }
 
         group.notify(queue: .main) {
-            syncQueue.sync {}
-            if hasFailure {
+            let ordered = syncQueue.sync { (hasFailure, collected.compactMap { $0 }) }
+            if ordered.0 {
                 completion(.failure(.loadFailed))
             } else {
-                completion(.success(collected))
+                completion(.success(ordered.1))
             }
         }
     }
