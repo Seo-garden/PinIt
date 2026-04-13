@@ -8,17 +8,20 @@
 import Domain
 import PhotosUI
 import UIKit
+import UniformTypeIdentifiers
 
 public final class PhotoPickerAdapter: NSObject, PhotoPickerAdaptable {
     private let loadPhotoFromCameraUseCase: LoadPhotoFromCameraUseCase
     private let loadPhotoFromGalleryUseCase: LoadPhotoFromGalleryUseCase
+    private let loadPhotoFromImageDataUseCase: LoadPhotoFromImageDataUseCase
     private let fetchUserLocationUseCase: FetchUserLocationUseCase
     private var completion: ((Result<[PhotoData], PhotoError>) -> Void)?
     private var fallbackCoordinate: Coordinate?
 
-    public init(loadPhotoFromCameraUseCase: LoadPhotoFromCameraUseCase, loadPhotoFromGalleryUseCase: LoadPhotoFromGalleryUseCase, fetchUserLocationUseCase: FetchUserLocationUseCase) {
+    public init(loadPhotoFromCameraUseCase: LoadPhotoFromCameraUseCase, loadPhotoFromGalleryUseCase: LoadPhotoFromGalleryUseCase, loadPhotoFromImageDataUseCase: LoadPhotoFromImageDataUseCase, fetchUserLocationUseCase: FetchUserLocationUseCase) {
         self.loadPhotoFromCameraUseCase = loadPhotoFromCameraUseCase
         self.loadPhotoFromGalleryUseCase = loadPhotoFromGalleryUseCase
+        self.loadPhotoFromImageDataUseCase = loadPhotoFromImageDataUseCase
         self.fetchUserLocationUseCase = fetchUserLocationUseCase
         super.init()
     }
@@ -66,30 +69,41 @@ extension PhotoPickerAdapter: UIImagePickerControllerDelegate, UINavigationContr
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true) { [weak self] in
             guard let self else { return }
-            guard let image = info[.originalImage] as? UIImage,
-                  let imageData = image.jpegData(compressionQuality: 1.0) else {
-                self.completion?(.failure(.loadFailed))
-                self.completion = nil
-                return
-            }
-            
+
             let metadata = info[.mediaMetadata] as? [AnyHashable: Any] ?? [:]
             let fallback = self.fallbackCoordinate
-            self.loadPhotoFromCameraUseCase.execute(imageData: imageData, metadata: metadata) { [weak self] result in
-                switch result {
-                case .success(let photos):
-                    let adjusted = photos.map { photo in
-                        if photo.coordinate == nil, let fallback {
-                            return PhotoData(imageData: photo.imageData, coordinate: fallback)
-                        }
-                        return photo
+
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                let imageData: Data
+                if let url = info[.imageURL] as? URL, let originalData = try? Data(contentsOf: url) {
+                    imageData = originalData
+                } else if let image = info[.originalImage] as? UIImage,
+                          let jpegData = image.jpegData(compressionQuality: 0.9) {
+                    imageData = jpegData
+                } else {
+                    DispatchQueue.main.async {
+                        self?.completion?(.failure(.loadFailed))
+                        self?.completion = nil
                     }
-                    self?.completion?(.success(adjusted))
-                case .failure:
-                    self?.completion?(result)
+                    return
                 }
-                self?.fallbackCoordinate = nil
-                self?.completion = nil
+
+                self?.loadPhotoFromCameraUseCase.execute(imageData: imageData, metadata: metadata) { [weak self] result in
+                    switch result {
+                    case .success(let photos):
+                        let adjusted = photos.map { photo in
+                            if photo.coordinate == nil, let fallback {
+                                return PhotoData(imageData: photo.imageData, coordinate: fallback)
+                            }
+                            return photo
+                        }
+                        self?.completion?(.success(adjusted))
+                    case .failure:
+                        self?.completion?(result)
+                    }
+                    self?.fallbackCoordinate = nil
+                    self?.completion = nil
+                }
             }
         }
     }
@@ -118,31 +132,33 @@ extension PhotoPickerAdapter: PHPickerViewControllerDelegate {
     }
 
     private func loadViaItemProviders(results: [PHPickerResult]) {
+        let typeIdentifier = UTType.image.identifier
         let group = DispatchGroup()
-        var collected: [PhotoData] = []
+        var collected = [Data?](repeating: nil, count: results.count)
         let syncQueue = DispatchQueue(label: "photo.picker.fallback.queue")
 
-        for result in results {
-            guard result.itemProvider.canLoadObject(ofClass: UIImage.self) else { continue }
+        for (index, result) in results.enumerated() {
+            guard result.itemProvider.hasItemConformingToTypeIdentifier(typeIdentifier) else { continue }
             group.enter()
-            result.itemProvider.loadObject(ofClass: UIImage.self) { object, _ in
+            result.itemProvider.loadDataRepresentation(forTypeIdentifier: typeIdentifier) { data, _ in
                 defer { group.leave() }
-                guard let image = object as? UIImage else { return }
-                guard let data = image.jpegData(compressionQuality: 1.0) else { return }
-                let photo = PhotoData(imageData: data, coordinate: nil)
-                syncQueue.async { collected.append(photo) }
+                guard let data else { return }
+                syncQueue.async { collected[index] = data }
             }
         }
 
         group.notify(queue: .main) { [weak self] in
             guard let self else { return }
-            syncQueue.sync {}
-            if collected.isEmpty {
+            let ordered = syncQueue.sync { collected.compactMap { $0 } }
+            guard !ordered.isEmpty else {
                 self.completion?(.failure(.loadFailed))
-            } else {
-                self.completion?(.success(collected))
+                self.completion = nil
+                return
             }
-            self.completion = nil
+            self.loadPhotoFromImageDataUseCase.execute(items: ordered) { [weak self] result in
+                self?.completion?(result)
+                self?.completion = nil
+            }
         }
     }
 }

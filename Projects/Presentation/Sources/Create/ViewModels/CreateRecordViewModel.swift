@@ -15,14 +15,17 @@ public final class CreateRecordViewModel: ViewModelType {
     public static let maxPhotos = 5
     private let locationSuggestionUseCase: LocationSuggestionUseCase
     private let saveRecordUseCase: SaveRecordUseCase
+    private let encodePhotosUseCase: EncodePhotosUseCase
     private var disposeBag = DisposeBag()
 
     public init(
         locationSuggestionUseCase: LocationSuggestionUseCase,
-        saveRecordUseCase: SaveRecordUseCase
+        saveRecordUseCase: SaveRecordUseCase,
+        encodePhotosUseCase: EncodePhotosUseCase
     ) {
         self.locationSuggestionUseCase = locationSuggestionUseCase
         self.saveRecordUseCase = saveRecordUseCase
+        self.encodePhotosUseCase = encodePhotosUseCase
     }
 
     public struct PhotoState: Equatable {
@@ -160,6 +163,7 @@ public final class CreateRecordViewModel: ViewModelType {
 
     public struct Output {
         public let state: Driver<State>
+        public let isSaving: Driver<Bool>
         public let requestCamera: Signal<Void>
         public let requestGallery: Signal<Int>
         public let showAlert: Signal<AlertMessage>
@@ -169,6 +173,7 @@ public final class CreateRecordViewModel: ViewModelType {
 
     public func transform(input: Input) -> Output {
         let state = BehaviorRelay<State>(value: State())
+        let isSaving = BehaviorRelay<Bool>(value: false)
 
         let requestCamera = input.takePhotoTap.asObservable()
             .withLatestFrom(state)
@@ -249,7 +254,9 @@ public final class CreateRecordViewModel: ViewModelType {
         let drivenState = state.asDriver()
 
         let saveResult = input.recordTap.asObservable()
-            .withLatestFrom(state)
+            .withLatestFrom(Observable.combineLatest(state.asObservable(), isSaving.asObservable()))
+            .filter { !$0.1 }
+            .map { $0.0 }
             .filter { s in
                 let trimmed = RecordCaptionValidator.trimmed(s.form.caption)
                 return !s.photo.photos.isEmpty
@@ -257,30 +264,46 @@ public final class CreateRecordViewModel: ViewModelType {
                     && s.location.coordinate != nil
                     && s.location.locationName != nil
             }
+            .do(onNext: { _ in isSaving.accept(true) })
             .flatMapLatest { [weak self] s -> Observable<Event<Record>> in
                 guard let self,
                       let coordinate = s.location.coordinate,
                       let locationName = s.location.locationName else { return .empty() }
-                let draft = RecordDraft(
-                    photoDataList: s.photo.photos,
-                    caption: RecordCaptionValidator.trimmed(s.form.caption),
-                    locationName: locationName,
-                    coordinate: coordinate
-                )
-                return Observable.create { observer in
-                    self.saveRecordUseCase.execute(draft: draft) { result in
-                        switch result {
-                        case .success(let record):
-                            observer.onNext(.next(record))
+                return Observable.create { [weak self] observer in
+                    guard let self else {
+                        observer.onCompleted()
+                        return Disposables.create()
+                    }
+                    self.encodePhotosUseCase.execute(photos: s.photo.photos) { [weak self] encodedPhotos in
+                        guard let self else {
                             observer.onCompleted()
-                        case .failure(let error):
-                            observer.onNext(.error(error))
-                            observer.onCompleted()
+                            return
+                        }
+                        let draft = RecordDraft(
+                            photoDataList: encodedPhotos,
+                            caption: RecordCaptionValidator.trimmed(s.form.caption),
+                            locationName: locationName,
+                            coordinate: coordinate
+                        )
+                        self.saveRecordUseCase.execute(draft: draft) { result in
+                            switch result {
+                            case .success(let record):
+                                observer.onNext(.next(record))
+                                observer.onCompleted()
+                            case .failure(let error):
+                                observer.onNext(.error(error))
+                                observer.onCompleted()
+                            }
                         }
                     }
                     return Disposables.create()
                 }
             }
+            .do(
+                onNext: { _ in isSaving.accept(false) },
+                onError: { _ in isSaving.accept(false) },
+                onDispose: { isSaving.accept(false) }
+            )
             .share()
 
         let finish = saveResult
@@ -309,6 +332,7 @@ public final class CreateRecordViewModel: ViewModelType {
 
         return Output(
             state: drivenState,
+            isSaving: isSaving.asDriver(),
             requestCamera: requestCamera,
             requestGallery: requestGallery,
             showAlert: Signal.merge(overLimitAlert, saveError),
