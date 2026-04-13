@@ -70,35 +70,40 @@ extension PhotoPickerAdapter: UIImagePickerControllerDelegate, UINavigationContr
         picker.dismiss(animated: true) { [weak self] in
             guard let self else { return }
 
-            let imageData: Data
-            if let url = info[.imageURL] as? URL, let originalData = try? Data(contentsOf: url) {
-                imageData = originalData
-            } else if let image = info[.originalImage] as? UIImage,
-                      let jpegData = image.jpegData(compressionQuality: 0.9) {
-                imageData = jpegData
-            } else {
-                self.completion?(.failure(.loadFailed))
-                self.completion = nil
-                return
-            }
-
             let metadata = info[.mediaMetadata] as? [AnyHashable: Any] ?? [:]
             let fallback = self.fallbackCoordinate
-            self.loadPhotoFromCameraUseCase.execute(imageData: imageData, metadata: metadata) { [weak self] result in
-                switch result {
-                case .success(let photos):
-                    let adjusted = photos.map { photo in
-                        if photo.coordinate == nil, let fallback {
-                            return PhotoData(imageData: photo.imageData, coordinate: fallback)
-                        }
-                        return photo
+
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                let imageData: Data
+                if let url = info[.imageURL] as? URL, let originalData = try? Data(contentsOf: url) {
+                    imageData = originalData
+                } else if let image = info[.originalImage] as? UIImage,
+                          let jpegData = image.jpegData(compressionQuality: 0.9) {
+                    imageData = jpegData
+                } else {
+                    DispatchQueue.main.async {
+                        self?.completion?(.failure(.loadFailed))
+                        self?.completion = nil
                     }
-                    self?.completion?(.success(adjusted))
-                case .failure:
-                    self?.completion?(result)
+                    return
                 }
-                self?.fallbackCoordinate = nil
-                self?.completion = nil
+
+                self?.loadPhotoFromCameraUseCase.execute(imageData: imageData, metadata: metadata) { [weak self] result in
+                    switch result {
+                    case .success(let photos):
+                        let adjusted = photos.map { photo in
+                            if photo.coordinate == nil, let fallback {
+                                return PhotoData(imageData: photo.imageData, coordinate: fallback)
+                            }
+                            return photo
+                        }
+                        self?.completion?(.success(adjusted))
+                    case .failure:
+                        self?.completion?(result)
+                    }
+                    self?.fallbackCoordinate = nil
+                    self?.completion = nil
+                }
             }
         }
     }
