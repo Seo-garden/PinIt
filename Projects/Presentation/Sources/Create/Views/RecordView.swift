@@ -130,6 +130,8 @@ final class RecordView: UIView {
 
     let captionInputView = CaptionInputView(maxLength: RecordCaptionValidator.maxLength)
 
+    static let maxLocationTitleLength = 30
+
     let locationTitleTextField: UITextField = {
         let field = UITextField()
         field.placeholder = "제목을 입력하세요"
@@ -293,6 +295,7 @@ final class RecordView: UIView {
         allViews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
 
         captionCountLabel.text = "0 / \(RecordCaptionValidator.maxLength)"
+        locationTitleTextField.delegate = self
     }
 
     private func setupLayout() {
@@ -425,5 +428,16 @@ final class RecordView: UIView {
             }
         }
         chipsScrollView.isHidden = suggestions.isEmpty
+    }
+}
+
+// MARK: - UITextFieldDelegate
+
+extension RecordView: UITextFieldDelegate {
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard textField == locationTitleTextField else { return true }
+        guard let current = textField.text, let range = Range(range, in: current) else { return true }
+        let updated = current.replacingCharacters(in: range, with: string)
+        return updated.count <= Self.maxLocationTitleLength
     }
 }
