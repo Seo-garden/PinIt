@@ -20,12 +20,23 @@ public final class MapViewModel: ViewModelType {
         let centerLocation: Signal<Coordinate>
         let panToLocation: Signal<Coordinate>
         let showLocationDeniedAlert: Signal<Void>
+        let recordAnnotations: Signal<[RecordAnnotationItem]>
+    }
+
+    public struct RecordAnnotationItem {
+        public let coordinate: Coordinate
+        public let records: [Record]
     }
 
     private let fetchUserLocationUseCase: FetchUserLocationUseCase
+    private let fetchAllRecordsUseCase: FetchAllRecordsUseCase
 
-    public init(fetchUserLocationUseCase: FetchUserLocationUseCase) {
+    public init(
+        fetchUserLocationUseCase: FetchUserLocationUseCase,
+        fetchAllRecordsUseCase: FetchAllRecordsUseCase
+    ) {
         self.fetchUserLocationUseCase = fetchUserLocationUseCase
+        self.fetchAllRecordsUseCase = fetchAllRecordsUseCase
     }
 
     public func transform(input: Input) -> Output {
@@ -58,11 +69,42 @@ public final class MapViewModel: ViewModelType {
             return ()
         }
 
+        let recordAnnotations = input.viewDidAppear
+            .flatMapLatest { [weak self] _ -> Signal<[RecordAnnotationItem]> in
+                guard let self else { return .just([]) }
+                return self.fetchRecordAnnotationsSignal()
+            }
+
         return Output(
             centerLocation: initialLocation,
             panToLocation: locateMeLocation,
-            showLocationDeniedAlert: showLocationDeniedAlert
+            showLocationDeniedAlert: showLocationDeniedAlert,
+            recordAnnotations: recordAnnotations
         )
+    }
+
+    private func fetchRecordAnnotationsSignal() -> Signal<[RecordAnnotationItem]> {
+        Single<[RecordAnnotationItem]>.create { [weak self] single in
+            guard let self else {
+                single(.success([]))
+                return Disposables.create()
+            }
+            self.fetchAllRecordsUseCase.execute { result in
+                switch result {
+                case .success(let records):
+                    let grouped = Dictionary(grouping: records) { $0.coordinate.uniqueKey() }
+                    let items = grouped.compactMap { (_, records) -> RecordAnnotationItem? in
+                        guard let coordinate = records.first?.coordinate else { return nil }
+                        return RecordAnnotationItem(coordinate: coordinate, records: records)
+                    }
+                    single(.success(items))
+                case .failure:
+                    single(.success([]))
+                }
+            }
+            return Disposables.create()
+        }
+        .asSignal(onErrorJustReturn: [])
     }
 
     private func fetchResultSignal() -> Signal<Result<Coordinate, LocationError>> {

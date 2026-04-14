@@ -17,6 +17,12 @@ public final class MapViewController: BaseViewController<MapViewModel> {
     public override func setupUI() {
         view.addSubview(mapContainerView)
         mapContainerView.translatesAutoresizingMaskIntoConstraints = false
+
+        mapContainerView.mapView.delegate = self
+        mapContainerView.mapView.register(
+            RecordAnnotationView.self,
+            forAnnotationViewWithReuseIdentifier: RecordAnnotationView.reuseIdentifier
+        )
     }
 
     public override func setupLayout() {
@@ -55,6 +61,12 @@ public final class MapViewController: BaseViewController<MapViewModel> {
                 self?.showLocationSettingsAlert()
             })
             .disposed(by: disposeBag)
+
+        output.recordAnnotations
+            .emit(onNext: { [weak self] items in
+                self?.updateAnnotations(items)
+            })
+            .disposed(by: disposeBag)
     }
 
     private func pan(to coordinate: Coordinate) {
@@ -66,6 +78,41 @@ public final class MapViewController: BaseViewController<MapViewModel> {
         let center = CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: coordinate.longitude)
         let region = MKCoordinateRegion(center: center, latitudinalMeters: 300, longitudinalMeters: 300)
         mapContainerView.mapView.setRegion(region, animated: true)
+    }
+
+    private func updateAnnotations(_ items: [MapViewModel.RecordAnnotationItem]) {
+        let mapView = mapContainerView.mapView
+        let existing = mapView.annotations.compactMap { $0 as? RecordAnnotation }
+
+        let existingByKey = Dictionary(
+            existing.map { ($0.coordinateValue.uniqueKey(), $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        let newByKey = Dictionary(
+            items.map { ($0.coordinate.uniqueKey(), $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+
+        var toRemove: [RecordAnnotation] = []
+        var toAdd: [RecordAnnotation] = []
+
+        for (key, annotation) in existingByKey {
+            guard let newItem = newByKey[key] else {
+                toRemove.append(annotation)
+                continue
+            }
+            if annotation.records.map(\.id) != newItem.records.map(\.id) {
+                toRemove.append(annotation)
+                toAdd.append(RecordAnnotation(records: newItem.records, coordinate: newItem.coordinate))
+            }
+        }
+
+        for (key, newItem) in newByKey where existingByKey[key] == nil {
+            toAdd.append(RecordAnnotation(records: newItem.records, coordinate: newItem.coordinate))
+        }
+
+        mapView.removeAnnotations(toRemove)
+        mapView.addAnnotations(toAdd)
     }
 
     private func showLocationSettingsAlert() {
@@ -81,5 +128,20 @@ public final class MapViewController: BaseViewController<MapViewModel> {
             UIApplication.shared.open(url)
         })
         present(alert, animated: true)
+    }
+}
+
+// MARK: - MKMapViewDelegate
+extension MapViewController: MKMapViewDelegate {
+    public func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        guard let recordAnnotation = annotation as? RecordAnnotation else { return nil }
+
+        let view = mapView.dequeueReusableAnnotationView(
+            withIdentifier: RecordAnnotationView.reuseIdentifier,
+            for: recordAnnotation
+        ) as! RecordAnnotationView
+
+        view.configure(with: recordAnnotation)
+        return view
     }
 }
