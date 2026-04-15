@@ -9,7 +9,7 @@ import Domain
 import MapKit
 
 public final class RecordAnnotation: NSObject, MKAnnotation {
-    public let records: [Record]
+    public var records: [Record]
     public let coordinateValue: Coordinate
     public let coordinate: CLLocationCoordinate2D
 

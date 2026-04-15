@@ -77,10 +77,14 @@ final class AppDIContainer {
     }
 
     private func makeMapViewController() -> MapViewController {
-        return MapViewController(viewModel: MapViewModel(
+        let viewModel = MapViewModel(
             fetchUserLocationUseCase: fetchUserLocationUseCase,
             fetchAllRecordsUseCase: fetchAllRecordsUseCase
-        ))
+        )
+        let coordinator = MapCoordinator { [unowned self] record in
+            self.makeDetailRecordViewController(record: record)
+        }
+        return MapViewController(viewModel: viewModel, coordinator: coordinator)
     }
 
     private func makeFeedViewController() -> FeedViewController {

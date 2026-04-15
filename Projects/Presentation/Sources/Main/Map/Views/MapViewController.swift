@@ -13,6 +13,12 @@ import UIKit
 
 public final class MapViewController: BaseViewController<MapViewModel> {
     private let mapContainerView = MapView()
+    private let coordinator: MapCoordinator
+
+    public init(viewModel: MapViewModel, coordinator: MapCoordinator) {
+        self.coordinator = coordinator
+        super.init(viewModel: viewModel)
+    }
 
     public override func setupUI() {
         view.addSubview(mapContainerView)
@@ -101,9 +107,17 @@ public final class MapViewController: BaseViewController<MapViewModel> {
                 toRemove.append(annotation)
                 continue
             }
-            if annotation.records.map(\.id) != newItem.records.map(\.id) {
+
+            let oldIds = Set(annotation.records.map(\.id))
+            let newIds = Set(newItem.records.map(\.id))
+            let oldFirstId = annotation.records.first?.id
+            let newFirstId = newItem.records.first?.id
+
+            if oldIds != newIds || oldFirstId != newFirstId {
                 toRemove.append(annotation)
                 toAdd.append(RecordAnnotation(records: newItem.records, coordinate: newItem.coordinate))
+            } else if annotation.records.map(\.id) != newItem.records.map(\.id) {
+                annotation.records = newItem.records
             }
         }
 
@@ -143,5 +157,14 @@ extension MapViewController: MKMapViewDelegate {
 
         view.configure(with: recordAnnotation)
         return view
+    }
+
+    public func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        defer { mapView.deselectAnnotation(view.annotation, animated: false) }
+        guard let recordAnnotation = view.annotation as? RecordAnnotation else { return }
+
+        if recordAnnotation.records.count < 2, let record = recordAnnotation.records.first {
+            coordinator.pushDetail(record: record, from: self)
+        }
     }
 }
