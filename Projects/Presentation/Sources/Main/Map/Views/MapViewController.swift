@@ -61,6 +61,13 @@ public final class MapViewController: BaseViewController<MapViewModel> {
         ])
     }
 
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if bottomSheetViewController.isVisible {
+            bottomSheetViewController.hide(animated: false)
+        }
+    }
+
     public override func bind() {
         let input = MapViewModel.Input(
             viewDidAppear: rx.methodInvoked(#selector(viewDidAppear(_:)))
