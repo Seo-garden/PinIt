@@ -28,6 +28,13 @@ public final class MapBottomSheetView: UIView {
         return collectionView
     }()
 
+    private let grabberView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemGray3
+        view.layer.cornerRadius = 2.5
+        return view
+    }()
+
     private let pageControl: UIPageControl = {
         let control = UIPageControl()
         control.currentPageIndicatorTintColor = .label
@@ -81,17 +88,23 @@ public final class MapBottomSheetView: UIView {
         layer.shadowOffset = CGSize(width: 0, height: -2)
         layer.shadowRadius = 8
 
+        addSubview(grabberView)
         addSubview(collectionView)
         addSubview(pageControl)
 
-        [collectionView, pageControl].forEach {
+        [grabberView, collectionView, pageControl].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
     }
 
     private func setupLayout() {
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            grabberView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            grabberView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            grabberView.widthAnchor.constraint(equalToConstant: 36),
+            grabberView.heightAnchor.constraint(equalToConstant: 5),
+
+            collectionView.topAnchor.constraint(equalTo: grabberView.bottomAnchor, constant: 8),
             collectionView.leadingAnchor.constraint(equalTo: leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: pageControl.topAnchor, constant: -4),

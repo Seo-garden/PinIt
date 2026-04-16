@@ -15,6 +15,17 @@ public final class MapViewController: BaseViewController<MapViewModel> {
     private let mapContainerView = MapView()
     private let coordinator: MapCoordinator
 
+    private lazy var bottomSheetViewController: MapBottomSheetViewController = {
+        let viewController = coordinator.makeBottomSheet()
+        viewController.selectedRecord
+            .emit(onNext: { [weak self] record in
+                guard let self else { return }
+                self.coordinator.pushDetail(record: record, from: self)
+            })
+            .disposed(by: disposeBag)
+        return viewController
+    }()
+
     public init(viewModel: MapViewModel, coordinator: MapCoordinator) {
         self.coordinator = coordinator
         super.init(viewModel: viewModel)
@@ -29,6 +40,16 @@ public final class MapViewController: BaseViewController<MapViewModel> {
             RecordAnnotationView.self,
             forAnnotationViewWithReuseIdentifier: RecordAnnotationView.reuseIdentifier
         )
+
+        let mapTapGesture = UITapGestureRecognizer(target: self, action: #selector(handleMapTap))
+        mapTapGesture.delegate = self
+        mapTapGesture.cancelsTouchesInView = false
+        mapContainerView.mapView.addGestureRecognizer(mapTapGesture)
+    }
+
+    @objc private func handleMapTap() {
+        guard bottomSheetViewController.isVisible else { return }
+        bottomSheetViewController.hide()
     }
 
     public override func setupLayout() {
@@ -165,6 +186,30 @@ extension MapViewController: MKMapViewDelegate {
 
         if recordAnnotation.records.count < 2, let record = recordAnnotation.records.first {
             coordinator.pushDetail(record: record, from: self)
+        } else {
+            showBottomSheet(with: recordAnnotation.records)
         }
+    }
+}
+
+private extension MapViewController {
+    func showBottomSheet(with records: [Record]) {
+        bottomSheetViewController.configure(records: records)
+        if !bottomSheetViewController.isVisible {
+            bottomSheetViewController.show(in: self)
+        }
+    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+extension MapViewController: UIGestureRecognizerDelegate {
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        var current = touch.view
+        while let view = current {
+            if view is MKAnnotationView { return false }
+            if let sheetView = bottomSheetViewController.viewIfLoaded, view === sheetView { return false }
+            current = view.superview
+        }
+        return true
     }
 }

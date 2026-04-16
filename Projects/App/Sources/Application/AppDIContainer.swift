@@ -81,9 +81,14 @@ final class AppDIContainer {
             fetchUserLocationUseCase: fetchUserLocationUseCase,
             fetchAllRecordsUseCase: fetchAllRecordsUseCase
         )
-        let coordinator = MapCoordinator { [unowned self] record in
-            self.makeDetailRecordViewController(record: record)
-        }
+        let coordinator = MapCoordinator(
+            makeDetailViewController: { [unowned self] record in
+                self.makeDetailRecordViewController(record: record)
+            },
+            makeBottomSheetViewController: {
+                MapBottomSheetViewController()
+            }
+        )
         return MapViewController(viewModel: viewModel, coordinator: coordinator)
     }
 
