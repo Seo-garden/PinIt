@@ -22,6 +22,8 @@ public final class FeedViewModel: ViewModelType {
     public struct Input {
         public let viewDidAppear: Signal<Void>
         public let selectRecord: Signal<Int>
+        public let searchText: Driver<String>
+        public let sortOption: Driver<FeedSortOption>
     }
 
     public struct Output {
@@ -48,8 +50,22 @@ public final class FeedViewModel: ViewModelType {
             .bind(to: recordsRelay)
             .disposed(by: disposeBag)
 
+        let displayedRecords = Driver.combineLatest(
+            recordsRelay.asDriver(),
+            input.searchText.startWith(""),
+            input.sortOption.startWith(.dateDescending)
+        ) { records, query, sort -> [Record] in
+            let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+            let filtered = trimmed.isEmpty
+                ? records
+                : records.filter {
+                    $0.locationTitle.localizedCaseInsensitiveContains(trimmed)
+                }
+            return sort.sort(filtered)
+        }
+
         let navigateToDetail = input.selectRecord.asObservable()
-            .withLatestFrom(recordsRelay) { index, records -> Record? in
+            .withLatestFrom(displayedRecords.asObservable()) { index, records -> Record? in
                 guard index < records.count else { return nil }
                 return records[index]
             }
@@ -57,7 +73,7 @@ public final class FeedViewModel: ViewModelType {
             .asSignal(onErrorSignalWith: .empty())
 
         return Output(
-            records: recordsRelay.asDriver(),
+            records: displayedRecords,
             navigateToDetail: navigateToDetail
         )
     }
