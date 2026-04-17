@@ -13,10 +13,43 @@ import UIKit
 
 public final class MapViewController: BaseViewController<MapViewModel> {
     private let mapContainerView = MapView()
+    private let coordinator: MapCoordinator
+
+    private lazy var bottomSheetViewController: MapBottomSheetViewController = {
+        let viewController = coordinator.makeBottomSheet()
+        viewController.selectedRecord
+            .emit(onNext: { [weak self] record in
+                guard let self else { return }
+                self.coordinator.pushDetail(record: record, from: self)
+            })
+            .disposed(by: disposeBag)
+        return viewController
+    }()
+
+    public init(viewModel: MapViewModel, coordinator: MapCoordinator) {
+        self.coordinator = coordinator
+        super.init(viewModel: viewModel)
+    }
 
     public override func setupUI() {
         view.addSubview(mapContainerView)
         mapContainerView.translatesAutoresizingMaskIntoConstraints = false
+
+        mapContainerView.mapView.delegate = self
+        mapContainerView.mapView.register(
+            RecordAnnotationView.self,
+            forAnnotationViewWithReuseIdentifier: RecordAnnotationView.reuseIdentifier
+        )
+
+        let mapTapGesture = UITapGestureRecognizer(target: self, action: #selector(handleMapTap))
+        mapTapGesture.delegate = self
+        mapTapGesture.cancelsTouchesInView = false
+        mapContainerView.mapView.addGestureRecognizer(mapTapGesture)
+    }
+
+    @objc private func handleMapTap() {
+        guard bottomSheetViewController.isVisible else { return }
+        bottomSheetViewController.hide()
     }
 
     public override func setupLayout() {
@@ -26,6 +59,13 @@ public final class MapViewController: BaseViewController<MapViewModel> {
             mapContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             mapContainerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if bottomSheetViewController.isVisible {
+            bottomSheetViewController.hide(animated: false)
+        }
     }
 
     public override func bind() {
@@ -55,6 +95,12 @@ public final class MapViewController: BaseViewController<MapViewModel> {
                 self?.showLocationSettingsAlert()
             })
             .disposed(by: disposeBag)
+
+        output.recordAnnotations
+            .emit(onNext: { [weak self] items in
+                self?.updateAnnotations(items)
+            })
+            .disposed(by: disposeBag)
     }
 
     private func pan(to coordinate: Coordinate) {
@@ -66,6 +112,42 @@ public final class MapViewController: BaseViewController<MapViewModel> {
         let center = CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: coordinate.longitude)
         let region = MKCoordinateRegion(center: center, latitudinalMeters: 300, longitudinalMeters: 300)
         mapContainerView.mapView.setRegion(region, animated: true)
+    }
+
+    private func updateAnnotations(_ items: [MapViewModel.RecordAnnotationItem]) {
+        let mapView = mapContainerView.mapView
+        let existing = mapView.annotations.compactMap { $0 as? RecordAnnotation }
+
+        let existingByKey = Dictionary(
+            existing.map { ($0.coordinateValue.uniqueKey(), $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        let newByKey = Dictionary(
+            items.map { ($0.coordinate.uniqueKey(), $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+
+        var toRemove: [RecordAnnotation] = []
+        var toAdd: [RecordAnnotation] = []
+
+        for (key, annotation) in existingByKey {
+            guard let newItem = newByKey[key] else {
+                toRemove.append(annotation)
+                continue
+            }
+
+            if annotation.records != newItem.records {
+                toRemove.append(annotation)
+                toAdd.append(RecordAnnotation(records: newItem.records, coordinate: newItem.coordinate))
+            }
+        }
+
+        for (key, newItem) in newByKey where existingByKey[key] == nil {
+            toAdd.append(RecordAnnotation(records: newItem.records, coordinate: newItem.coordinate))
+        }
+
+        mapView.removeAnnotations(toRemove)
+        mapView.addAnnotations(toAdd)
     }
 
     private func showLocationSettingsAlert() {
@@ -81,5 +163,53 @@ public final class MapViewController: BaseViewController<MapViewModel> {
             UIApplication.shared.open(url)
         })
         present(alert, animated: true)
+    }
+}
+
+// MARK: - MKMapViewDelegate
+extension MapViewController: MKMapViewDelegate {
+    public func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        guard let recordAnnotation = annotation as? RecordAnnotation else { return nil }
+
+        let view = mapView.dequeueReusableAnnotationView(
+            withIdentifier: RecordAnnotationView.reuseIdentifier,
+            for: recordAnnotation
+        ) as! RecordAnnotationView
+
+        view.configure(with: recordAnnotation)
+        return view
+    }
+
+    public func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        defer { mapView.deselectAnnotation(view.annotation, animated: false) }
+        guard let recordAnnotation = view.annotation as? RecordAnnotation else { return }
+
+        if recordAnnotation.records.count < 2, let record = recordAnnotation.records.first {
+            coordinator.pushDetail(record: record, from: self)
+        } else {
+            showBottomSheet(with: recordAnnotation.records)
+        }
+    }
+}
+
+private extension MapViewController {
+    func showBottomSheet(with records: [Record]) {
+        bottomSheetViewController.configure(records: records)
+        if !bottomSheetViewController.isVisible {
+            bottomSheetViewController.show(in: self)
+        }
+    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+extension MapViewController: UIGestureRecognizerDelegate {
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        var current = touch.view
+        while let view = current {
+            if view is MKAnnotationView { return false }
+            if let sheetView = bottomSheetViewController.viewIfLoaded, view === sheetView { return false }
+            current = view.superview
+        }
+        return true
     }
 }
