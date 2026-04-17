@@ -23,7 +23,7 @@ public final class MapViewModel: ViewModelType {
         let recordAnnotations: Signal<[RecordAnnotationItem]>
     }
 
-    public struct RecordAnnotationItem {
+    public struct RecordAnnotationItem: Equatable {
         public let coordinate: Coordinate
         public let records: [Record]
     }

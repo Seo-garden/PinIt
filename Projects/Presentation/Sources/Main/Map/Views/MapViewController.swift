@@ -136,16 +136,9 @@ public final class MapViewController: BaseViewController<MapViewModel> {
                 continue
             }
 
-            let oldIds = Set(annotation.records.map(\.id))
-            let newIds = Set(newItem.records.map(\.id))
-            let oldFirstId = annotation.records.first?.id
-            let newFirstId = newItem.records.first?.id
-
-            if oldIds != newIds || oldFirstId != newFirstId {
+            if annotation.records != newItem.records {
                 toRemove.append(annotation)
                 toAdd.append(RecordAnnotation(records: newItem.records, coordinate: newItem.coordinate))
-            } else if annotation.records.map(\.id) != newItem.records.map(\.id) {
-                annotation.records = newItem.records
             }
         }
 
