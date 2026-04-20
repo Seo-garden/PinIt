@@ -161,8 +161,11 @@ extension SettingViewController: UITableViewDataSource {
             var config = cell.defaultContentConfiguration()
             config.text = AppStrings.Setting.changePassword
             config.image = UIImage(systemName: "key.horizontal")
+            config.textProperties.color = .tertiaryLabel
             cell.contentConfiguration = config
             cell.accessoryType = .disclosureIndicator
+            cell.selectionStyle = .none
+            cell.isUserInteractionEnabled = false
             return cell
 
         case .logout:
