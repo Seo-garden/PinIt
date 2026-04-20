@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SafariServices
 import RxCocoa
 import RxSwift
 
@@ -108,6 +109,11 @@ public final class SettingViewController: BaseViewController<SettingViewModel> {
         alert.addAction(UIAlertAction(title: AppStrings.Common.confirm, style: .default))
         present(alert, animated: true)
     }
+
+    private func presentSafari(url: URL) {
+        let safariViewController = SFSafariViewController(url: url)
+        present(safariViewController, animated: true)
+    }
 }
 
 // MARK: - UITableViewDataSource
@@ -203,6 +209,10 @@ extension SettingViewController: UITableViewDelegate {
         let row = SettingRow.rows(for: section)[indexPath.row]
 
         switch row {
+        case .privacyPolicy:
+            presentSafari(url: AppURLs.Setting.privacyPolicy)
+        case .termsOfService:
+            presentSafari(url: AppURLs.Setting.termsOfService)
         case .logout:
             logoutTapRelay.accept(())
         case .deleteAccount:
