@@ -13,7 +13,6 @@ enum SettingSection: Int, CaseIterable {
 
 enum SettingRow {
     case profile
-    case notification
     case privacyPolicy
     case termsOfService
     case changePassword
@@ -23,7 +22,7 @@ enum SettingRow {
     static func rows(for section: SettingSection) -> [SettingRow] {
         switch section {
         case .general:
-            return [.profile, .notification, .privacyPolicy, .termsOfService]
+            return [.profile, .privacyPolicy, .termsOfService]
         case .account:
             return [.changePassword]
         case .danger:

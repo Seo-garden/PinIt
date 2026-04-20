@@ -13,7 +13,6 @@ public final class SettingViewController: BaseViewController<SettingViewModel> {
     private let onLogout: (() -> Void)?
     private let settingView = SettingView()
 
-    private let notificationSwitch = UISwitch()
     private let logoutTapRelay = PublishRelay<Void>()
     private let deleteAccountTapRelay = PublishRelay<Void>()
 
@@ -139,16 +138,6 @@ extension SettingViewController: UITableViewDataSource {
             cell.emailLabel.text = email
             return cell
 
-        case .notification:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-            var config = cell.defaultContentConfiguration()
-            config.text = AppStrings.Setting.pushNotifications
-            config.image = UIImage(systemName: "bell.fill")
-            cell.contentConfiguration = config
-            cell.accessoryView = notificationSwitch
-            cell.selectionStyle = .none
-            return cell
-
         case .privacyPolicy:
             let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
             var config = cell.defaultContentConfiguration()
@@ -191,10 +180,12 @@ extension SettingViewController: UITableViewDataSource {
             var config = cell.defaultContentConfiguration()
             config.text = AppStrings.Setting.deleteAccount
             config.textProperties.alignment = .center
-            config.textProperties.color = .systemRed
+            config.textProperties.color = .tertiaryLabel
             config.textProperties.font = .systemFont(ofSize: 16, weight: .semibold)
             cell.contentConfiguration = config
             cell.accessoryType = .none
+            cell.selectionStyle = .none
+            cell.isUserInteractionEnabled = false
             return cell
         }
     }
