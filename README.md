@@ -1,4 +1,7 @@
-# PinIt
+
+|기능|미리보기|기능|미리보기|기능|미리보기|
+|:--:|:--:|:--:|:--:|:--:|:--:|
+|메인|<img src="https://github.com/user-attachments/assets/73484e96-f6b6-49ed-800f-ac439c510231" width="300" />| 기록 |<img src="https://github.com/user-attachments/assets/5a455946-413a-4670-8909-f37d338ab6e9" width="300" />|피드|<img src="https://github.com/user-attachments/assets/0f53cb8f-3399-49bc-bf88-4c0f0e4f7285" width="300" />|
 
 ## 1) PinIt 소개
 
