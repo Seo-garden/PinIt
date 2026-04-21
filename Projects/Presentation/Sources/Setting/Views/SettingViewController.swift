@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SafariServices
 import RxCocoa
 import RxSwift
 
@@ -13,7 +14,6 @@ public final class SettingViewController: BaseViewController<SettingViewModel> {
     private let onLogout: (() -> Void)?
     private let settingView = SettingView()
 
-    private let notificationSwitch = UISwitch()
     private let logoutTapRelay = PublishRelay<Void>()
     private let deleteAccountTapRelay = PublishRelay<Void>()
 
@@ -109,6 +109,11 @@ public final class SettingViewController: BaseViewController<SettingViewModel> {
         alert.addAction(UIAlertAction(title: AppStrings.Common.confirm, style: .default))
         present(alert, animated: true)
     }
+
+    private func presentSafari(url: URL) {
+        let safariViewController = SFSafariViewController(url: url)
+        present(safariViewController, animated: true)
+    }
 }
 
 // MARK: - UITableViewDataSource
@@ -139,16 +144,6 @@ extension SettingViewController: UITableViewDataSource {
             cell.emailLabel.text = email
             return cell
 
-        case .notification:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-            var config = cell.defaultContentConfiguration()
-            config.text = AppStrings.Setting.pushNotifications
-            config.image = UIImage(systemName: "bell.fill")
-            cell.contentConfiguration = config
-            cell.accessoryView = notificationSwitch
-            cell.selectionStyle = .none
-            return cell
-
         case .privacyPolicy:
             let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
             var config = cell.defaultContentConfiguration()
@@ -172,8 +167,11 @@ extension SettingViewController: UITableViewDataSource {
             var config = cell.defaultContentConfiguration()
             config.text = AppStrings.Setting.changePassword
             config.image = UIImage(systemName: "key.horizontal")
+            config.textProperties.color = .tertiaryLabel
             cell.contentConfiguration = config
             cell.accessoryType = .disclosureIndicator
+            cell.selectionStyle = .none
+            cell.isUserInteractionEnabled = false
             return cell
 
         case .logout:
@@ -191,10 +189,12 @@ extension SettingViewController: UITableViewDataSource {
             var config = cell.defaultContentConfiguration()
             config.text = AppStrings.Setting.deleteAccount
             config.textProperties.alignment = .center
-            config.textProperties.color = .systemRed
+            config.textProperties.color = .tertiaryLabel
             config.textProperties.font = .systemFont(ofSize: 16, weight: .semibold)
             cell.contentConfiguration = config
             cell.accessoryType = .none
+            cell.selectionStyle = .none
+            cell.isUserInteractionEnabled = false
             return cell
         }
     }
@@ -209,6 +209,10 @@ extension SettingViewController: UITableViewDelegate {
         let row = SettingRow.rows(for: section)[indexPath.row]
 
         switch row {
+        case .privacyPolicy:
+            presentSafari(url: AppURLs.Setting.privacyPolicy)
+        case .termsOfService:
+            presentSafari(url: AppURLs.Setting.termsOfService)
         case .logout:
             logoutTapRelay.accept(())
         case .deleteAccount:

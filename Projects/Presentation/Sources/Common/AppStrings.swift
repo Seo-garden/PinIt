@@ -46,7 +46,6 @@ enum AppStrings {
     }
 
     enum Setting {
-        static let pushNotifications = NSLocalizedString("setting.pushNotifications", value: "알림 설정", comment: "")
         static let privacyPolicy = NSLocalizedString("setting.privacyPolicy", value: "개인정보처리방침", comment: "")
         static let termsOfService = NSLocalizedString("setting.termsOfService", value: "이용약관", comment: "")
         static let changePassword = NSLocalizedString("setting.changePassword", value: "비밀번호 재설정", comment: "")
