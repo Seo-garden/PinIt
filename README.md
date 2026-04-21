@@ -39,9 +39,9 @@ Projects/
 
 | 분류 | 사용 기술 |
 |---|---|
-| 언어 / 플랫폼 | Swift 6, iOS 17.0+ |
+| 언어 / 플랫폼 | Swift 5, iOS 17.0+ |
 | UI | UIKit (코드 기반, Storyboard 미사용), AutoLayout |
-| 반응형 | RxSwift 6 / RxCocoa |
+| 반응형 | RxSwift / RxCocoa |
 | 프로젝트 관리 | Tuist 4 (SPM 연동) |
 | 위치/지도 | MapKit, CoreLocation |
 | 사진 | PhotosUI, PHPickerViewController |
