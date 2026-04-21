@@ -87,12 +87,26 @@ curl -Ls https://install.tuist.io | bash
 tuist version
 ```
 
-2. 프로젝트 생성
+2. 의존성 설치 및 프로젝트 생성
 
 ```bash
+tuist install
 tuist generate
 ```
 
 3. Xcode에서 실행
 
-- 생성된 `PinIt.xcworkspace`를 열어 `PinItApp` 스킴을 실행합니다.
+- 생성된 `PinIt.xcworkspace`를 열어 `App` 스킴을 실행합니다.
+
+## 6) 테스트 계정 (Mock 로그인)
+
+현재 인증은 백엔드 서버 준비 전까지 **Mock으로 동작**합니다. 로그인 화면에서 아래 계정으로 진입할 수 있습니다.
+
+| 이메일 | 비밀번호 |
+|---|---|
+| `test@pinit.com` | `password1234` |
+
+- 다른 값으로 로그인 시 "이메일 또는 비밀번호가 일치하지 않습니다" 에러가 표시됩니다.
+- 로그인 상태는 `UserDefaults`에 저장되어 앱 재실행 시 유지됩니다.
+- 네트워크 지연을 흉내내기 위해 각 인증 요청은 약 0.3초의 지연을 포함합니다.
+- 백엔드 서버 준비 완료 시 `Data` 계층의 `DefaultAuthRepository` / `DefaultAuthSessionRepository` 구현만 실제 API 호출로 교체하면 됩니다.
