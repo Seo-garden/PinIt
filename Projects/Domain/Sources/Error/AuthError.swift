@@ -8,7 +8,6 @@
 import Foundation
 
 public enum AuthError: LocalizedError {
-    case firebaseNotConfigured
     case missingUserEmail
     case wrongCredentials
     case invalidEmail
@@ -19,8 +18,6 @@ public enum AuthError: LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .firebaseNotConfigured:
-            return "Firebase 설정이 완료되지 않았습니다. Data 타깃 리소스에 GoogleService-Info.plist를 추가해주세요."
         case .missingUserEmail:
             return "로그인한 사용자 정보를 확인할 수 없습니다."
         case .wrongCredentials:

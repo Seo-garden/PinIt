@@ -6,27 +6,21 @@
 //
 
 import Domain
-import FirebaseAuth
 import Foundation
 
 public struct DefaultAuthSessionRepository: AuthSessionRepository {
     public init() { }
 
     public func isSignedIn() -> Bool {
-        guard FirebaseBootstrap.configureIfNeeded() else {
-            return false
-        }
-
-        return Auth.auth().currentUser != nil
+        MockAuthSessionStore.isSignedIn
     }
 
     public func currentUserEmail() -> String? {
-        guard FirebaseBootstrap.configureIfNeeded() else { return nil }
-        return Auth.auth().currentUser?.email
+        MockAuthSessionStore.email
     }
 
     public func currentUserDisplayName() -> String? {
-        guard FirebaseBootstrap.configureIfNeeded() else { return nil }
-        return Auth.auth().currentUser?.displayName
+        guard let email = MockAuthSessionStore.email else { return nil }
+        return email.split(separator: "@").first.map(String.init)
     }
 }

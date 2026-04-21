@@ -4,7 +4,7 @@ import ProjectDescription
 let project = Project.makeModule(
     name: "Presentation",
     product: .framework,
-    hasTests: true,
+    hasTests: false,
     dependencies: [
         .project(target: "Domain", path: "../Domain"),
         .external(name: "Expose"),

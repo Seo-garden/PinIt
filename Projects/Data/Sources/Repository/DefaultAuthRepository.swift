@@ -7,100 +7,46 @@
 
 import Domain
 import Foundation
-import FirebaseAuth
-import FirebaseCore
 
 public final class DefaultAuthRepository: AuthRepository, @unchecked Sendable {
+    private static let mockEmail = "test@pinit.com"
+    private static let mockPassword = "password1234"
+    private static let simulatedDelay: DispatchTimeInterval = .milliseconds(300)
+
     public init() { }
 
     public func signIn(email: String, password: String, completion: @escaping (Result<String, AuthError>) -> Void) {
-        guard FirebaseBootstrap.configureIfNeeded() else {
-            completion(.failure(.firebaseNotConfigured))
-            return
-        }
-
-        Auth.auth().signIn(withEmail: email, password: password) { result, error in
-            if let error {
-                completion(.failure(Self.map(error)))
+        DispatchQueue.global().asyncAfter(deadline: .now() + Self.simulatedDelay) {
+            guard email == Self.mockEmail, password == Self.mockPassword else {
+                completion(.failure(.wrongCredentials))
                 return
             }
-
-            guard let email = result?.user.email else {
-                completion(.failure(.missingUserEmail))
-                return
-            }
-
+            MockAuthSessionStore.email = email
             completion(.success(email))
         }
     }
 
     public func signOut(completion: @escaping (Result<Void, AuthError>) -> Void) {
-        guard FirebaseBootstrap.configureIfNeeded() else {
-            completion(.failure(.firebaseNotConfigured))
-            return
-        }
-
-        do {
-            try Auth.auth().signOut()
+        DispatchQueue.global().asyncAfter(deadline: .now() + Self.simulatedDelay) {
+            MockAuthSessionStore.email = nil
             completion(.success(()))
-        } catch {
-            completion(.failure(.unknown))
         }
     }
 
     public func deleteAccount(completion: @escaping (Result<Void, AuthError>) -> Void) {
-        guard FirebaseBootstrap.configureIfNeeded() else {
-            completion(.failure(.firebaseNotConfigured))
-            return
-        }
-
-        guard let user = Auth.auth().currentUser else {
-            completion(.failure(.userNotFound))
-            return
-        }
-
-        user.delete { error in
-            if let error {
-                completion(.failure(Self.map(error)))
-            } else {
-                completion(.success(()))
+        DispatchQueue.global().asyncAfter(deadline: .now() + Self.simulatedDelay) {
+            guard MockAuthSessionStore.email != nil else {
+                completion(.failure(.userNotFound))
+                return
             }
+            MockAuthSessionStore.email = nil
+            completion(.success(()))
         }
     }
 
     public func resetPassword(email: String, completion: @escaping (Result<Void, AuthError>) -> Void) {
-        guard FirebaseBootstrap.configureIfNeeded() else {
-            completion(.failure(.firebaseNotConfigured))
-            return
-        }
-
-        Auth.auth().sendPasswordReset(withEmail: email) { error in
-            if let error {
-                completion(.failure(Self.map(error)))
-            } else {
-                completion(.success(()))
-            }
-        }
-    }
-
-    private static func map(_ error: Error) -> AuthError {
-        guard let errorCode = AuthErrorCode(rawValue: (error as NSError).code) else {
-            return .unknown
-        }
-
-        switch errorCode {
-        case .wrongPassword, .invalidCredential:
-            return .wrongCredentials
-        case .invalidEmail:
-            return .invalidEmail
-        case .userNotFound:
-            return .userNotFound
-        case .networkError:
-            return .network
-        case .tooManyRequests:
-            return .tooManyRequests
-        default:
-            return .unknown
+        DispatchQueue.global().asyncAfter(deadline: .now() + Self.simulatedDelay) {
+            completion(.success(()))
         }
     }
 }

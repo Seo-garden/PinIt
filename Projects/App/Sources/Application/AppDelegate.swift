@@ -5,16 +5,12 @@
 //  Created by 서정원 on 3/3/26.
 //
 
-import Data
 import UIKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        FirebaseBootstrap.configureIfNeeded()
         return true
     }
 
