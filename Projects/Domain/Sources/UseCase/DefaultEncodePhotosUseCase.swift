@@ -25,10 +25,8 @@ public final class DefaultEncodePhotosUseCase: EncodePhotosUseCase {
         let quality = self.quality
         DispatchQueue.global(qos: .userInitiated).async {
             let encoded = photos.map { photo -> PhotoData in
-                autoreleasepool {
                     let newData = encoder.encodeToJPEGIfNeeded(photo.imageData, quality: quality)
                     return PhotoData(imageData: newData, coordinate: photo.coordinate)
-                }
             }
             DispatchQueue.main.async {
                 completion(encoded)
